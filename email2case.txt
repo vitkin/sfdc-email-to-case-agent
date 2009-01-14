@@ -1,0 +1,13 @@
+<configFile>
+    <server1>
+        <url>exchange.internal.company.com</url>
+        <protocol>imap</protocol>
+        <userName>user</userName>
+        <password>password</password>
+        <interval>10</interval>
+        <inbox>testInbox</inbox>
+        <readbox>testProcessing0</readbox>
+        <errorbox>testError</errorbox>
+    </server1>
+</configFile>
+
