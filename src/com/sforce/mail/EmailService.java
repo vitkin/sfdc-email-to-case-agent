@@ -63,6 +63,9 @@ public class EmailService extends SalesforceService {
                     String port = config.get(server, ConfigParameters.pPORT);
                     String protocol = config.get(server, ConfigParameters.pPROTOCOL);
                     String user = config.get(server, ConfigParameters.pUSERNAME);
+                    
+                    // Decrypt the password if necessary
+                    GenericClient.handlePasswordDecryption(config, server);
                     String pass = config.get(server, ConfigParameters.pPASSWORD);
 
                     // How often does the agent look for new mail on the mail server

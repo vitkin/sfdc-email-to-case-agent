@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -62,10 +63,12 @@ import com.sforce.soap.partner.wsc.LoginResult;
 import com.sforce.soap.partner.wsc.PartnerConnection;
 import com.sforce.soap.partner.wsc.SaveResult;
 import com.sforce.soap.partner.wsc.Error;
+import com.sforce.util.EncryptionUtil;
 
 import com.sforce.soap.partner.fault.wsc.ApiFault;
 import com.sforce.soap.partner.fault.wsc.ExceptionCode;
 import com.sforce.soap.partner.fault.wsc.LoginFault;
+import com.sforce.config.ConfigInfo;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
@@ -132,11 +135,18 @@ public abstract class GenericClient {
     protected GenericClient(LoginCredentials loginCredentials) {
         this.loginCredentials = loginCredentials;
         try {
+        	
+        	// Check for an encrypted password in the SFDC section
+        	handlePasswordDecryption(SalesforceAgent.GLOBAL_CONFIG, ConfigParameters.pLOGIN);
+        	
             conn = this.getConnection();
         } catch (ConnectionException e) {
             logger.error("Failed to bind to SFDC service on initialization.\n" + e.getMessage());
             SalesforceAgent.processNotification(Notification.SFDC_SERVICE_DOWN, e.getMessage(), Notification.SEVERITY_ERROR);
-        }
+        } catch (InvalidConfigurationException e) {
+            logger.error("Failed to configure SFDC connection.\n" + e.getMessage());
+            SalesforceAgent.processNotification(Notification.SFDC_SERVICE_DOWN, e.getMessage(), Notification.SEVERITY_ERROR);
+        } 
     }
 
     /**
@@ -169,7 +179,7 @@ public abstract class GenericClient {
      * @throws FailedBindingException
      * This was made protected for testing purposes.
      */
-    protected PartnerConnection getConnection() throws ConnectionException{
+    protected PartnerConnection getConnection() throws ConnectionException {
         int iAttempts = 0;
         boolean bSuccess = false;
 
@@ -190,7 +200,7 @@ public abstract class GenericClient {
                         forceNewSession();
                         throw new ConnectionException("Failed to connect to SFDC service after "+iAttempts+" tries. Aborting!", e);
                     }
-                }
+                } 
             }
         }
 
@@ -208,6 +218,49 @@ public abstract class GenericClient {
     }
 
     /**
+     * Handles password decryption for the specified server configuration
+     */
+    public static void handlePasswordDecryption(ConfigInfo config, String serverConfigurationName) throws InvalidConfigurationException {
+        
+        String password = config.get(serverConfigurationName, ConfigParameters.pPASSWORD);
+        String encryptedPassword = config.get(serverConfigurationName, ConfigParameters.pENCRYPTED_PASSWORD);
+        String encryptionKeyFile = config.get(serverConfigurationName, ConfigParameters.pENCRYPTION_KEY_FILE);
+
+        // Check for encrypted password. For clarity, we allow either <password> or <encryptedPassword,encryptionKeyFile> to be specified,
+        // but no other combination
+        if(encryptedPassword != null) {
+
+        	if(password != null) {
+        		throw new InvalidConfigurationException(InvalidConfigurationException.ConfigurationExceptionCode.CRYPTO_PASSWORD_COLLISION);
+        	}
+        	
+        	if( encryptionKeyFile == null) {
+        		throw new InvalidConfigurationException(InvalidConfigurationException.ConfigurationExceptionCode.CRYPTO_KEY_MISSING);
+        	}
+        	
+        	try {
+        		// Attempt the decryption
+            	EncryptionUtil decrypter = new EncryptionUtil();
+        		decrypter.setCipherKeyFromFilePath(encryptionKeyFile);
+        		String decryptedPassword = decrypter.decryptString(encryptedPassword);
+        		
+        		// Store the newly decrypted password
+        		config.put(serverConfigurationName, ConfigParameters.pPASSWORD, decryptedPassword);
+        		
+        	} catch (IOException e) {
+        		throw new InvalidConfigurationException(InvalidConfigurationException.ConfigurationExceptionCode.CRYPTO_KEY_INITIALIZATION_FAILURE, e);
+        	} catch (GeneralSecurityException e) {
+        		throw new InvalidConfigurationException(InvalidConfigurationException.ConfigurationExceptionCode.CRYPTO_DECRYPTION_FAILURE, e);
+        	}
+        	
+        	
+        }
+        
+    }
+    
+
+    
+    /**
      * Connects to the Salesforce system as needed, maintaining a live connection until
      * the specified timeout has elapsed. Kanishka made this protected.
      * @throws ConnectionException
@@ -218,6 +271,7 @@ public abstract class GenericClient {
      * @throws LoginFault
      * @throws RemoteException
      */
+    
     protected void login() throws ConnectionException {
 
         try {
@@ -231,6 +285,8 @@ public abstract class GenericClient {
             String refresh = SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pLOGIN, ConfigParameters.pLOGIN_REFRESH);
             String sTimeout = SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pLOGIN, ConfigParameters.pTIMEOUT);
 
+
+            
             config.setUsername(userName);
             config.setPassword(password);
             config.setAuthEndpoint(loginUrl);

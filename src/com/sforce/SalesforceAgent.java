@@ -187,7 +187,8 @@ public class SalesforceAgent {
          * For password, try to accept the input from the console if it has not been
          * provided and make sure to prevent the password from being shadowed to the console
          */
-        if (config.get(ConfigParameters.pSFDC_LOGIN, ConfigParameters.pPASSWORD) == null) {
+        if (config.get(ConfigParameters.pSFDC_LOGIN, ConfigParameters.pPASSWORD) == null && 
+        	config.get(ConfigParameters.pSFDC_LOGIN, ConfigParameters.pENCRYPTED_PASSWORD) == null) {
             try {
                 String sPassword = ConsoleReader.readPasswordFromConsole("Salesforce.com Password");
                 if (sPassword != null) {

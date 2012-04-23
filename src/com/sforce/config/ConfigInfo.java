@@ -60,7 +60,7 @@ public class ConfigInfo {
             }
         }
     }
-
+    
     /*
      * readFile is a helper function to read the contents of a file and return
      * a string representation.
