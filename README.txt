@@ -174,7 +174,7 @@ largeAttachmentSize       - Specified in MB, this is the threshold at which the 
 Example #1 with authenticated SMTP:
 <configFile>
     <sfdcLogin>
-        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <url>https://login.salesforce.com/services/Soap/u/29.0</url>
         <userName>TestUser@Company.com</userName>
         <password>MyPassword</password>
         <loginRefresh>30</loginRefresh>
@@ -203,7 +203,7 @@ Example #1 with authenticated SMTP:
 Example #2 without authenticated SMTP:
 <configFile>
     <sfdcLogin>
-        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <url>https://login.salesforce.com/services/Soap/u/29.0</url>
         <userName>TestUser@Company.com</userName>
         <password>MyPassword</password>
         <loginRefresh>30</loginRefresh>

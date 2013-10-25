@@ -263,8 +263,7 @@
     <dependency>
       <groupId>com.sforce.sfdc-wsc</groupId>
       <artifactId>sfdc-wsc-ws-partner-email</artifactId>
-      <version>9.0</version>
-      <classifier>jdk16</classifier>
+      <version>29.0.0</version>
     </dependency>
   </dependencies>
 

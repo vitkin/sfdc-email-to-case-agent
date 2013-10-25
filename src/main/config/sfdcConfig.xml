@@ -1,6 +1,6 @@
 <configFile>
     <sfdcLogin>
-        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <url>https://login.salesforce.com/services/Soap/u/29.0</url>
         <userName>user@company.com</userName>
         <password>123456</password>
         <loginRefresh>30</loginRefresh>
