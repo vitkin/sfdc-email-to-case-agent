@@ -160,7 +160,7 @@ Salesforce.com has a limit on the size of attachments for any single case.  When
 <pre>
 <configFile>
     <sfdcLogin>
-        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <url>https://login.salesforce.com/services/Soap/u/29.0</url>
         <userName>TestUser@Company.com</userName>
         <password>MyPassword</password>
         <loginRefresh>30</loginRefresh>
@@ -190,7 +190,7 @@ Salesforce.com has a limit on the size of attachments for any single case.  When
 <pre>
 <configFile>
     <sfdcLogin>
-        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <url>https://login.salesforce.com/services/Soap/u/29.0</url>
         <userName>TestUser@Company.com</userName>
         <password>MyPassword</password>
         <loginRefresh>30</loginRefresh>
@@ -220,7 +220,7 @@ Salesforce.com has a limit on the size of attachments for any single case.  When
 <pre>
 <configFile>
     <sfdcLogin>
-        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <url>https://login.salesforce.com/services/Soap/u/29.0</url>
         <userName>TestUser@Company.com</userName>
         <encryptedPassword>889c5c0e87b66bea7ca1ad88d7f2a9e1</encryptedPassword>
         <encryptionKeyFile>sample.key</encryptionKeyFile>

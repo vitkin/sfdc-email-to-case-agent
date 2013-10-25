@@ -1,4 +1,4 @@
-Sforce Email-to-Case Version 1.9
+Sforce Email-to-Case Version 1.09
 
 This Email-to-Case Agent source code is a toolkit that pulls emails from your mail
 server and uses the sforce API to create new cases or append to an existing case.
@@ -23,10 +23,8 @@ Getting Started
 - Download the Zip file and extract to the local directory of your choice. We will
   refer to your local directory as $Local from now on.
 - The following directory structure will be created:
-      $Local\EmailAgent\       : Contains config and main jar
-      $Local\EmailAgent\doc    : Documentation
-      $Local\EmailAgent\lib    : Supporting jar files
-      $Local\EmailAgent\src    : Delivered source code
+      $Local\EmailAgent\       : Contains configs and main, src and doc JARs
+      $Local\EmailAgent\lib\   : Supporting jar files
 
 - In the $Local\EmailAgent\ directory you will need to configure
   the sfdcConfig.xml file to connect to Salesforce. Details on this are below.
@@ -46,13 +44,6 @@ Getting Started
   customize logging, consult the log4j documentation at
   http://logging.apache.org/log4j/docs/documentation.html
 
-Development:
-
-Included in this distribution are the Eclipse .project and .classpath files so
-that you can easily start enhancing this project using the Eclipse development
-environment.  The email2case.jardesc file can be used to repackage the
-executable jar -- Email2Case.jar so that you can easily run this from the command-line.
-
 Configuration:
 email2case.xml and sfdcConfig.xml are both simple XML configuration files.
 ********************************************************************************
@@ -64,7 +55,7 @@ PROTOCOL - IMAP, and may support others in the future.
 USERNAME - Name of the user that will log in to the mail server.
            Typically, the name of the email account, like platinumsupport.
 PASSWORD - Password to authenticate the user against the mail server.
-ENCRYPTEDPASSWORD - If you're using password encryption, this is the encrypted string.
+ENCRYPTEDPASSWORD - If you're using password encryption, this is the encrypted string.  
 		    (Note: you cannot specify both PASSWORD and ENCRYPTEDPASSWORD.)
 ENCRYPTIONKEYFILE - If you're using password encryption, this is the file containing
 		    the key used for encryption & decryption. Required if using ENCRYPTEDPASSWORD
@@ -206,7 +197,7 @@ largeAttachmentSize       - Specified in MB, this is the threshold at which the 
 Example #1 (with authenticated SMTP)
 <configFile>
     <sfdcLogin>
-        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <url>https://login.salesforce.com/services/Soap/u/29.0</url>
         <userName>TestUser@Company.com</userName>
         <password>MyPassword</password>
         <loginRefresh>30</loginRefresh>
@@ -235,7 +226,7 @@ Example #1 (with authenticated SMTP)
 Example #2 (without authenticated SMTP)
 <configFile>
     <sfdcLogin>
-        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <url>https://login.salesforce.com/services/Soap/u/29.0</url>
         <userName>TestUser@Company.com</userName>
         <password>MyPassword</password>
         <loginRefresh>30</loginRefresh>
@@ -264,7 +255,7 @@ Example #3 (when using an encrypted password to connect to Salesforce)
 <configFile>
 	...
     <sfdcLogin>
-        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <url>https://login.salesforce.com/services/Soap/u/29.0</url>
         <userName>TestUser@Company.com</userName>
         <encryptedPassword>889c5c0e87b66bea7ca1ad88d7f2a9e1</encryptedPassword>
         <encryptionKeyFile>sample.key</encryptionKeyFile>
@@ -332,5 +323,5 @@ either create a new case, or append the email to an existing case based on the
 presence of a key (threadID) in the subject, or in the body of the message.  The key is
 added to an outbound email when Email-to-Case is enabled.
 
-This code is written in Java, and requires JDK 1.6.0 or greater.  
-It utilizes the WSC SOAP stack.
+This code is written in Java, and requires JDK 1.6.0 or greater.  It utilizes
+the WSC SOAP stack.

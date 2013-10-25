@@ -57,7 +57,7 @@ public class SalesforceAgent {
     // The SALESFORCE_AGENT_VERSION must be in Major.Minor version(1.x, not 1.x.1) so that it appears correctly in the Login History
     public static final String SALESFORCE_AGENT_VERSION = "1.9";
     public static final String SALESFORCE_AGENT_VERSION_MSG = "Email To Case Agent v" + SALESFORCE_AGENT_VERSION;
-    private static final double[] SUPPORTED_SALESFORCE_API_VERSIONS = { 8.0, 9.0 };
+    private static final double[] SUPPORTED_SALESFORCE_API_VERSIONS = { 29.0 };
 
     public static ConfigInfo GLOBAL_CONFIG;
     public static Map<String, SalesforceService> timers = new HashMap<String, SalesforceService>();
@@ -228,7 +228,7 @@ public class SalesforceAgent {
         	}
 
         	if(!apiVersionIsSupported) {
-        		logger.warn("Detected a potentially unsupported API version.  Please consider updating your salesforce.com login endpoint to use API version 9.0.  By default, this configuration is specified in the sfdcConfig.xml file under 'url' in the 'sfdcLogin' section.  We recommend setting it to <url>https://www.salesforce.com/services/Soap/u/9.0</url>.");
+        		logger.warn("Detected a potentially unsupported API version.  Please consider updating your salesforce.com login endpoint to use API version 29.0.  By default, this configuration is specified in the sfdcConfig.xml file under 'url' in the 'sfdcLogin' section.  We recommend setting it to <url>https://login.salesforce.com/services/Soap/u/29.0</url>.");
         	}
         } else {
         	throw new InvalidConfigurationException(ConfigurationExceptionCode.SFDC_MISSING_LOGIN_URL);

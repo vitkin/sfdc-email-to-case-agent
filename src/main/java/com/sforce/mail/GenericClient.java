@@ -318,7 +318,7 @@ public abstract class GenericClient {
             //need to do a manual login to set the proper headers
             config.setManualLogin(true);
             this.conn = Connector.newConnection(config);
-            conn.setCallOptions("EmailAgent/" + SalesforceAgent.SALESFORCE_AGENT_VERSION, null, false, null, null);
+            conn.setCallOptions("EmailAgent/" + SalesforceAgent.SALESFORCE_AGENT_VERSION, "");
             conn.setAssignmentRuleHeader(null, true);
             //Note: no email header needed for email2case client because the proper behavior is
             //set by overriden methods in EmailToCaseObject
