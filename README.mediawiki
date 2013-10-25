@@ -1,0 +1,407 @@
+= Important Note on Email To Case as a Service =
+
+Please note that as of the Spring '09 release we now offer Email To Case as a Service.  This means that in most cases, you no longer need the client software described on this page; you need only create an On Demand Email To Case inbox and forward your emails to it.  For information on how to do that, please see [http://blogs.salesforce.com/support/2009/02/new-in-spring-1.html this blog post].
+
+You may still need the client software if you expect to be taking attachments larger than 10Mb, or if you need to export attachments to a local server.  If this is not the case for you, then you will likely be better served using Email To Case as a Service.
+
+= About =
+This EmailToCase Agent source code is a toolkit that pulls emails from your mail server and uses the Force.com API to create new cases or append to an existing case. It currently supports IMAP servers.
+
+Customers can use the source code to extend the Email Agent to meet additional requirements.
+
+The Email To Case Toolkit is subject to the terms of Salesforce.com's existing Support policies. Salesforce.com will provide support for only the most current version of the Email To Case Toolkit, including support for the most current version of the Toolkit's backing API.  If the source code is changed by a customer to meet additional requirements, Salesforce.com is no longer responsible to provide support.
+
+== Download  ==
+
+Click [http://downloads.developerforce.com/website/EmailAgent.zip EmailAgent.zip] to download
+
+
+= Getting started =
+== Installation ==
+# Make sure you have JDK 1.6.0 or above installed. To download go to Sun's site here: [http://java.sun.com/javase/downloads/index.jsp].
+# Make sure you have a test email account, and test Salesforce Service and Support organization to test with.  Developer Edition accounts are free, and a great place to test.
+# Enable EmailToCase in your Salesforce Service and Support account.
+# Download the Zip file and extract to the local directory of your choice. We will refer to your local directory as $Local from now on.
+#:The following directory structure will be created:
+<table>
+<tr><td>$Local\EmailAgent\</td><td>Contains configs and main, src and doc JARs</td></tr>
+<tr><td>$Local\EmailAgent\lib</td><td>Supporting jar files</td></tr>
+</table>
+
+== Configuration ==
+# In the $Local\EmailAgent\ directory you will need to configure the sfdcConfig.xml file to connect to salesforce.com, details on this are below.
+# Also in the $Local\EmailAgent\ directory you will need to edit email2case.xml to configure connections to your mail servers, details on this are below.
+
+== Running ==
+# To run the Email Agent now, on win32 you can use the supplied bat file email2case.bat and the agent will start polling your mail server.  To invoke the agent from the command line, use the following command from the  $Local\EmailAgent\ directory :
+#<pre>java -jar Email2Case.jar sfdcConfig.xml log4j.properties</pre>
+# While the agent is running, it will log messages to the console and to a text file in the $Local\EmailAgent\ directory called SalesforceAgent.log.  Settings for logging can be set in log4j.properties file in the same directory.  For instance, you can turn off logging to the console entirely by commenting out the CONSOLE section in this file.  It is also possible to change the file name for the log file in the LOGFILE section. for more information on how to customize logging, consult the log4j documentation at  http://logging.apache.org/log4j/docs/documentation.html
+
+= Development =
+
+Included in this distribution are the eclipse .project and .classpath files so that you can easily start enhancing this project using the eclipse development environment.  The email2case.jardesc file can be used to repackage the
+executable jar -- Email2Case.jar so that you can easily run this from the command-line.
+
+= Configuration =
+email2case.xml and sfdcConfig.xml are both simple XML configuration files.
+
+== email2case.xml ==
+URL      - Name of the mail server to connect with.<br>
+PORT     - The port to connect to on the Mail Server - optional Default port 143 will be used if not provided.<br>
+PROTOCOL - IMAP, but if you want to connect to SSL encrypted IMAP Servers  (like e.g. GMAIL) use IMAPS and the PORT 993,  may support others in the future.<br>
+USERNAME - Name of the user that will login to the mail server.  Typically, the name of the email account, like platinumsupport *Note: Exchange may require the following format - userid@domain (as opposed to server\name or just name.)<br>
+PASSWORD - Password to authenticate the user against the mail server<br>
+ENCRYPTEDPASSWORD - If you're using password encryption, this is the encrypted string.
+            (Note: you cannot specify both PASSWORD and ENCRYPTEDPASSWORD.)
+ENCRYPTIONKEYFILE - If you're using password encryption, this is the file containing
+            the key used for encryption & decryption. Required if using ENCRYPTEDPASSWORD
+INTERVAL - How often (in minutes) should the agent poll the mail server for new messages.  This must be an integer greater than or equal to 1.<br>
+INBOX    - Name of the folder to look for new messages in<br>
+READBOX  - Name of the folder to move messages to after they have been processed.<br>
+ERRORBOX - Name of the folder to move messages to in the event of an error.  If the agent cannot successfully execute a transaction with the sfdc server, messages will be moved to this folder so that manual action can be taken if necessary (requeueing etc...).<br>
+
+::Note:  If you want to nest folder names, be sure to either use the delimiter that is supported by your mail server for separating folders(often '/' or '.' or you can always use '.' and the agent will convert to the correct delimiter supported by your mail server at runtime.
+<b>Example #1:</b>
+<pre>
+<configFile>
+    <server1>
+        <url>exchange.company.com</url>
+        <protocol>imap</protocol>
+        <userName>mailman</userName>
+        <password>passwrd</password>
+        <interval>10</interval>
+        <inbox>testInbox</inbox>
+        <readbox>testInbox.testNestedProcessing</readbox>
+        <errorbox>testInbox.testNestedError</errorbox>
+    </server1>
+</configFile>
+</pre>
+
+Note that the email agent can poll multiple email inboxes.  Here is an example of how to configure it to poll two email inboxes.
+
+<b>Example #2:</b>
+<pre>
+<configFile>
+    <server1>
+        <url>exchange.company.com</url>
+        <protocol>imap</protocol>
+        <userName>mailman_1</userName>
+        <password>passwrd</password>
+        <interval>10</interval>
+        <inbox>testInbox_1</inbox>
+        <readbox>testInbox.testNestedProcessing</readbox>
+        <errorbox>testInbox.testNestedError</errorbox>
+    </server1>
+
+    <server2>
+        <url>exchange.company.com</url>
+        <protocol>imap</protocol>
+        <userName>mailman_2</userName>
+        <password>passwrd</password>
+        <interval>10</interval>
+        <inbox>testInbox_2</inbox>
+        <readbox>testInbox.testNestedProcessing</readbox>
+        <errorbox>testInbox.testNestedError</errorbox>
+    </server2>
+</configFile>
+</pre>
+
+And here is how you would configure a server block with an encrypted password:
+
+<b>Example #3 (encrypted password, with one server)</b>
+<pre>
+<configFile>
+    <server1>
+        <url>exchange.company.com</url>
+        <protocol>imap</protocol>
+        <userName>mailman</userName>
+        <encryptedPassword>889c5c0e87b66bea7ca1ad88d7f2a9e1</encryptedPassword>
+        <encryptionKeyFile>sample.key</encryptionKeyFile>
+        <interval>10</interval>
+        <inbox>testInbox</inbox>
+        <readbox>testInbox.testNestedProcessing</readbox>
+        <errorbox>testInbox.testNestedError</errorbox>
+    </server1>
+</configFile>
+</pre>
+
+= sfdcConfig.xml =
+== Force.com Connectivity ==
+URL          - URL of the Force.com web services endpoint.  Most customers do not need to change this<br>
+USERNAME     - Username of the Salesforce user who will create cases<br>
+PASSWORD     - Password of the Salesforce user (may require security token appended)<br>
+ENCRYPTEDPASSWORD - If you're using password encryption, this is the encrypted string
+            (Note: you cannot specify both PASSWORD and ENCRYPTEDPASSWORD).
+ENCRYPTIONKEYFILE - If you're using password encryption, this is the file containing
+            the key used for encryption & decryption. Required if using ENCRYPTEDPASSWORD
+LOGINREFRESH - How often should the code relogin to refresh the Salesforce session, in minutes.<br>
+TIMEOUT      - The timeout to specify for the SOAP binding, in milliseconds.  The default value is 600 milliseconds.<br>
+com.sforce.mail.EmailService - Pointer to the email2Case configuration file.<br>
+
+== Notification Processing: ==
+<table>
+<tr><td>NOTIFYEMAIL</td><td>Email address of person to send notification to in event of a problem.  To send to multiple recipients, separate addresses by commas.</td></tr>
+<tr><td>FROM</td><td>Sender Address of above.</td></tr>
+<tr><td>HOST</td><td>SMTP Host for Email, or is using Notification extensions this can be any other type of host you need.</td></tr>
+<tr><td>PORT</td><td>SMTP Port for above host - optional. Default port 25 will be used if not provided.</td></tr>
+<tr><td>USER</td><td>For SMTP, this is the user needed for SMTP to authenticate.</td></tr>
+<tr><td>PASSWORD</td><td>For authentication, if needed.</td></tr>
+<tr><td>SERVICE</td><td>The class to use for invoking notifications.  The provided class, com.sforce.mail.SMTPNotification, is for sending Email notifications via SMTP.  Another class is also provided for use with SMTP servers that require authentication (e.g. Yahoo, Hosted Mail Providers).  This Class, com.sforce.mail.SMTPNotificationAuth does require the user and password parameters to be provided The architecture is designed such that another class could be used in its place for other protocols as  desired SMNP, JMX etc...  To do this, subclass com.sforce.mail.Notification.</td></tr>
+</table>
+
+== Large Attachment Processing: ==
+Salesforce.com has a limit on the size of attachments for any single case.  When an attachment exceeds this limit, the creation of a case for the email fails and an error is generated.  To prevent this from happening, and to manage the storage of large attachments, the files can be stripped from the email they are attached to, and stored on a file system that you specify.  Here are the settings that you must configure to activate this optional feature.
+
+<table><tr><td>largeAttachmentDirectory</td><td>This is the high level directory where you want to store the attachments.  Subdirectories will be created each day an attachment is processed.</td></tr>
+<tr><td>largeAttachmentURLPrefix</td><td>This is a url which will prefix a unique filename stored in a proxy file that points to the real file so that you can link to the file from the Salesforce application</td></tr>
+<tr><td>largeAttachmentSize</td><td>Specified in MB, this is the threshold at which the agent will strip attachments and copy them to disk.</td></tr></table>
+
+<b>Example #1 with authenticated SMTP:</b>
+<pre>
+<configFile>
+    <sfdcLogin>
+        <url>https://www.salesforce.com/services/Soap/u/6.0</url>
+        <userName>TestUser@Company.com</userName>
+        <password>MyPassword</password>
+        <loginRefresh>30</loginRefresh>
+        <timeout>600</timeout>
+    </sfdcLogin>
+    <notify>
+        <notifyEmail>admin@your_company.com, E2CSupport@your_company.com</notifyEmail>
+        <from>sample_user@your_company.com</from>
+        <host>smtp.mail.your_company.com</host>
+    <port>25</port>
+        <user>sample_user</user>
+        <password>123456</password>
+        <service>com.sforce.mail.SMTPNotificationAuth</service>
+    </notify>
+    <attachments>
+        <largeAttachmentDirectory>\\nfs-001\west\cases\</largeAttachmentDirectory>
+        <largeAttachmentURLPrefix>file:\\nfs-001\west\cases\</largeAttachmentURLPrefix>
+        <largeAttachmentSize>5</largeAttachmentSize>
+    </attachments>
+    <services>
+        <com.sforce.mail.EmailService>C:\\EmailAgent\\email2case.xml</com.sforce.mail.EmailService>
+    </services>
+</configFile>
+</pre>
+
+<b>Example #2 without authenticated SMTP:</b>
+<pre>
+<configFile>
+    <sfdcLogin>
+        <url>https://www.salesforce.com/services/Soap/u/6.0</url>
+        <userName>TestUser@Company.com</userName>
+        <password>MyPassword</password>
+        <loginRefresh>30</loginRefresh>
+        <timeout>600</timeout>
+    </sfdcLogin>
+    <notify>
+        <notifyEmail>admin@your_company.com, E2CSupport@your_company.com</notifyEmail>
+        <from>sample_user@your_company.com</from>
+        <host>smtp.mail.your_company.com</host>
+    <port>25</port>
+        <user>sample_user</user>
+        <password>123456</password>
+        <service>com.sforce.mail.SMTPNotification</service>
+    </notify>
+    <attachments>
+        <largeAttachmentDirectory>\\nfs-001\west\cases\</largeAttachmentDirectory>
+        <largeAttachmentURLPrefix>file:\\nfs-001\west\cases\</largeAttachmentURLPrefix>
+        <largeAttachmentSize>5</largeAttachmentSize>
+    </attachments>
+    <services>
+        <com.sforce.mail.EmailService>C:\\EmailAgent\\email2case.xml</com.sforce.mail.EmailService>
+    </services>
+</configFile>
+</pre>
+
+<b>Example #3 (when using an encrypted password to connect to Salesforce)</b>
+<pre>
+<configFile>
+    <sfdcLogin>
+        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <userName>TestUser@Company.com</userName>
+        <encryptedPassword>889c5c0e87b66bea7ca1ad88d7f2a9e1</encryptedPassword>
+        <encryptionKeyFile>sample.key</encryptionKeyFile>
+        <loginRefresh>30</loginRefresh>
+        <timeout>600</timeout>
+    </sfdcLogin>
+</configFile>
+</pre>
+
+= Guide to Using Password Encryption =
+
+If you would prefer not to store your passwords in plaintext in the config files,
+you can use built-in functionality for encrypting your password. This can be used with both the <sfdcLogin> config section (for connection to Salesforce) and
+with the <server1> configs used to configure the IMAP servers. To use encryption,
+here are the additional steps required:
+
+*Generate a key file. An example key file (sample.key) is provided. To make your own key, run the following command from the command line:
+
+<pre>
+java -cp <path to Email2Case.jar> com.sforce.util.EncryptionUtil -g <seedText>
+</pre>
+
+... where <seedText> is the string of your choice used to generate a random key.
+
+*Take the output of this command and store it in your key file. You can use the given sample.key if you wish, but we recommend making your own.
+
+*Encrypt your password. From the command line:
+
+<pre>
+java -cp <path to Email2Case.jar> com.sforce.util.EncryptionUtil -e <password> <path to keyfile>
+</pre>
+
+... and save the output. Note that if you do not pass a keyfile, a default key will be used, but this default key cannot be used for decryption, so you will later get a decryption error. You must provide a keyfile.
+
+*In the relevant config file (either sdfcConfig.xml or email2Case.xml), delete the <password> configuration element and replace it with the encrypted password as <encryptedPassword>, and     specify the key file as <encryptionKeyFile>.
+
+
+If you are having trouble, make certain that the same key file is used for both encryption and
+decryption. You can test your stored encrypted password with the verify command:
+
+<pre>
+java -cp <path to Email2Case.jar> com.sforce.util.EncryptionUtil -v <encryptedPassword> <expectedValue> <path to keyfile>
+</pre>
+
+Note: the password encryption algorithm is 64-bit DES.
+
+= Additional information =
+If you need to generate a WSDL with the EmailToCase API calls in the WSDL, add "&email=1" to the end of the WSDL generation URL in the application.
+
+https://na1.salesforce.com/soap/wsdl.jsp?email=1 (Partner WSDL)
+https://na1.salesforce.com/soap/wsdl.jsp?type=*&email=1 (Enterprise WSDL)
+
+There is an API call to support EmailToCase called handleEmailMessage, which takes an array of HandledEmailMessage.  HandledEmailMessage contains the email body, and any attachments associate with the email.  The new API call will either create a new case, or append the email to an existing case based on the presence of a key (threadID) in the subject, or in the body of the message.  The key is added to an outbound email when EmailToCase is enabled.
+
+This code is written in Java, and requires JDK 1.6.0 or greater.  It utilizes the WSC SOAP stack.
+
+== changelog? ==
+
+where does one find the changelog for this?
+
+== Daemon Script ==
+
+Here is a script to run the tool as a daemon on *nix.
+
+This script has been tested on Red Hat and can be easely changed to run on other *nix flavors
+
+<pre>
+#!/bin/bash
+#
+# Startup script for Email2Case
+#
+# chkconfig: - 86 15
+# description: Email to Case Agent for SalesForce.com
+# processname: email2case
+#
+
+JAVA_HOME=/usr/java/jdk1.6.0
+JAVA_OPTS='-server -Xmx128m'
+
+EMAIL2CASE_USER=a_user
+
+EMAIL2CASE_HOME=/home/a_user/EmailAgent
+PID_FILE=$EMAIL2CASE_HOME/run/email2case.pid
+LOG_FILE=$EMAIL2CASE_HOME/log/email2case.log
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Get config.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "${NETWORKING}" = "no" ] && exit 0
+
+start() {
+    echo "Starting Email2Case:"
+    cd $EMAIL2CASE_HOME
+    su $EMAIL2CASE_USER -c "nohup $JAVA_HOME/bin/java $JAVA_OPTS -jar Email2Case.jar sfdcConfig.xml log4j.properties >> $LOG_FILE 2>&1 & echo \$! > $PID_FILE"
+    PID="$(<$PID_FILE)"
+    echo "PID: $PID"
+    echo "Done!"
+    RETVAL=$?
+    echo
+}
+
+status() {
+    if [ -f $PID_FILE ]
+    then
+        PID="$(<$PID_FILE)"
+        ps -p $PID 2>&1 > /dev/null
+        STATUS=$?
+        if [ $STATUS -eq 1 ]
+        then
+            echo "Email2Case is NOT running"
+        else
+            echo "Email2Case is running"
+            echo "PID: $PID"
+        fi
+    else
+        echo "Error: PID file not found"
+    fi
+    RETVAL=$?
+    echo
+}
+
+stop() {
+    if [ -f $PID_FILE ]
+    then
+        echo "Shutting down Email2Case:"
+        PID="$(<$PID_FILE)"
+        ps -p $PID 2>&1 > /dev/null
+        STATUS=$?
+        if [ $STATUS -eq 0 ]
+        then
+            kill $PID
+            rm $PID_FILE
+            echo "Done!"
+        else
+            echo "Error: Email2Case is NOT running"
+        fi
+    else
+        echo "Error: PID file not found"
+    fi
+    RETVAL=$?
+    echo
+}
+
+# See how we were called
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status
+        ;;
+  restart)
+        stop
+        sleep 10
+        start
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|status|restart}"
+esac
+
+exit 0
+</pre>
+
+=== Installation ===
+
+* Copy the script into a file named say 'Email2Case' in /etc/init.d/
+* Modify the following variable to fit your environment
+** JAVA_HOME
+** JAVA_OPTS
+** EMAIL2CASE_USER
+** EMAIL2CASE_HOME
+* Make the script executable
+  chmod a+x /etc/init.d/Email2Case
+* Register the service
+  /sbin/chkconfig --add Email2Case
+* Set it to start at level 3, 4 and 5
+  /sbin/chkconfig --level 345 Email2Case on

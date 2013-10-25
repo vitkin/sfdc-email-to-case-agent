@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: com.sforce.SalesforceAgent
-Class-Path: ./lib/activation.jar ./lib/log4j-1.2.8.jar ./lib/mailapi.jar ./lib/imap.jar ./lib/smtp.jar ./lib/pop3.jar ./lib/partnerWSDL.jar ./lib/wsc.jar ./lib/concurrent.jar
