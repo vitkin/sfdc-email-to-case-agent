@@ -1,0 +1,26 @@
+<configFile>
+    <sfdcLogin>
+        <url>https://www.salesforce.com/services/Soap/u/9.0</url>
+        <userName>user@company.com</userName>
+        <password>123456</password>
+        <loginRefresh>30</loginRefresh>
+        <timeout>600</timeout>
+    </sfdcLogin>
+    <notify>
+	    <notifyEmail>admin@your_company.com, E2CSupport@your_company.com</notifyEmail>
+        <from>sample_user@your_company.com</from>
+        <host>smtp.mail.your_company.com</host>
+		<port>25</port>
+        <user>sample_user</user>
+        <password>123456</password>
+        <service>com.sforce.mail.SMTPNotification</service>
+    </notify>
+    <attachments>
+        <largeAttachmentDirectory>\\files\Departments\Development\Users\joe\</largeAttachmentDirectory>
+        <largeAttachmentURLPrefix>file:\\files\Departments\Development\Users\joe\</largeAttachmentURLPrefix>
+        <largeAttachmentSize>0.5</largeAttachmentSize>
+    </attachments>
+    <services>
+        <com.sforce.mail.EmailService>C:\\EmailAgent\\email2case.xml</com.sforce.mail.EmailService>
+    </services>
+</configFile>
