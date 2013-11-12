@@ -9,13 +9,13 @@
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
  * that the following conditions are met:
  * 
- * 1) Redistributions of source code must retain the above copyright notice, this list of conditions and the
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
  *    following disclaimer.
  * 
- * 2) Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
  *    the following disclaimer in the documentation and/or other materials provided with the distribution.
  * 
- * 3) Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
+ * 3. Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
  *    promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
@@ -32,11 +32,13 @@ package com.sforce;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import com.sforce.config.ConfigInfo;
@@ -50,23 +52,42 @@ import com.sforce.exception.InvalidConfigurationException;
 import com.sforce.exception.InvalidConfigurationException.ConfigurationExceptionCode;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 public class SalesforceAgent {
+    
+    //Logging
+    private static final Logger logger = Logger.getLogger(SalesforceAgent.class);
+    
     private static final String pJAVA_SYS_PROPS = "             J A V A    S Y S T E M   P R O P E R T I E S";
     // The SALESFORCE_AGENT_VERSION must be in Major.Minor version(1.0x, not 1.0x.01) so that it appears correctly in the Login History
-    public static final String SALESFORCE_AGENT_VERSION = "1.08";
-    public static final String SALESFORCE_AGENT_VERSION_MSG = "Email To Case Agent v" + SALESFORCE_AGENT_VERSION;
+    public static final String SALESFORCE_AGENT_VERSION;
+    
+    static {
+        Properties pom = new Properties();
+        
+        try {
+            pom.load(SalesforceAgent.class.getResourceAsStream(
+                "/META-INF/maven/com.sforce/sfdc-email-to-case-agent/" 
+                + "pom.properties"));
+        }
+        catch (IOException | NullPointerException ex) {
+            logger.warn("Couldn't retrieve the version!", ex);
+        }
+        
+        SALESFORCE_AGENT_VERSION = pom.getProperty("version", "#.#");
+    }
+    
+    public static final String SALESFORCE_AGENT_VERSION_MSG = "SFDC Email-to-Case Agent v" + SALESFORCE_AGENT_VERSION;
     private static final double[] SUPPORTED_SALESFORCE_API_VERSIONS = { 29.0 };
 
     public static ConfigInfo GLOBAL_CONFIG;
-    public static Map<String, SalesforceService> timers = new HashMap<String, SalesforceService>();
-    public static Map<String, Object> nonTimers = new HashMap<String, Object>();
-    private static Set<String> setServers = Collections.synchronizedSet(new HashSet<String>(3));
+    public static Map<String, SalesforceService> timers = new HashMap<>();
+    public static Map<String, Object> nonTimers = new HashMap<>();
+    private static final Set<String> setServers = Collections.synchronizedSet(new HashSet<String>(3));
 
     // Strings
-    private static final String pSTART_UP_MESSAGE      = "Starting EmailToCase Agent v" + SALESFORCE_AGENT_VERSION;
-    private static final String pSHUTDOWN_MESSAGE      = "EmailToCase Agent Shut Down.";
+    private static final String pSTART_UP_MESSAGE      = "Starting SFDC Email-to-Case Agent v" + SALESFORCE_AGENT_VERSION;
+    private static final String pSHUTDOWN_MESSAGE      = "SFDC Email-to-Case Agent Shut Down.";
     private static final String pLOADING_CFG_FILE      = "Loading configuration file ";
     private static final String pFATAL_ERROR           = "FATAL EXCEPTION";
     private static final String pPARSING_CFG_FILE      = "Parsing config file: ";
@@ -80,10 +101,8 @@ public class SalesforceAgent {
 
     public static final String SERVICES                = "services";
 
-    //Logging
-    static Logger logger = Logger.getLogger(SalesforceAgent.class.getName());
 
-
+    
     public static void main(String[] args) {
 
         try {
@@ -94,15 +113,13 @@ public class SalesforceAgent {
             // voluntarily or not...
             Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHook()));
 
-            if (args.length < 2) {
+            if (args.length < 1) {
                 showUsage();
                 System.exit(0);
             }
-            String fileName = null;
+            String fileName;
             fileName = args[0];
 
-            String sLog4JCfg = args[1];
-            PropertyConfigurator.configure(sLog4JCfg);
             logger.info(pSTART_UP_MESSAGE);
 
             logJavaProperties();
@@ -123,9 +140,8 @@ public class SalesforceAgent {
 
             String[] services = GLOBAL_CONFIG.getList(SERVICES);
             if (services != null) {
-                for (int i = 0; i < services.length; i++) {
-                    String serviceName = services[i];
-                    String serviceConfigFile = GLOBAL_CONFIG.get(SERVICES, services[i]);
+                for (String serviceName : services) {
+                    String serviceConfigFile = GLOBAL_CONFIG.get(SERVICES, serviceName);
                     ConfigInfo serviceConfig = loadConfig(serviceConfigFile);
                     if (serviceConfig == null) {
                         logger.info("Unable to create configuration for service: " + serviceName + " with file " + serviceConfigFile);
@@ -133,8 +149,8 @@ public class SalesforceAgent {
                     } else {
                         logger.info(pSTART_SERVICE_MESSAGE + serviceName + pWITH_CFG_FILE + serviceConfigFile);
 
-                        Class serviceClass = Class.forName(serviceName);
-                        Constructor constructor = serviceClass.getConstructor(new Class[0]);
+                        Class<?> serviceClass = Class.forName(serviceName);
+                        Constructor<?> constructor = serviceClass.getConstructor(new Class[0]);
                         Object serviceObj = constructor.newInstance(new Object[0]);
 
                         if (serviceObj instanceof SalesforceService) {
@@ -155,7 +171,10 @@ public class SalesforceAgent {
                    System.exit(0);
                 }
             }
-        } catch (Exception ex) {
+        } catch (IOException | ClassNotFoundException | NoSuchMethodException | 
+                 SecurityException | InstantiationException | 
+                 IllegalAccessException | IllegalArgumentException | 
+                 InvocationTargetException | InterruptedException ex) {
             logger.fatal(pFATAL_ERROR,ex);
         }
         logger.info(pSHUTDOWN_MESSAGE);
@@ -318,7 +337,7 @@ public class SalesforceAgent {
     private static String readFile(File file) throws IOException {
         FileReader fileReader = new FileReader(file);
 
-        StringBuffer content = new StringBuffer();
+        StringBuilder content = new StringBuilder();
 
         int read = fileReader.read();
         while (read != -1) {
@@ -335,7 +354,7 @@ public class SalesforceAgent {
     private static void showUsage() {
 
         System.out.println("\nEmail2Case usage:\n");
-        System.out.println("    java -jar Email2Case.jar sfdcConfig.xml log4j.properties\n");
+        System.out.println("    java -Dlog4j.config=log4j.xml -jar Email2Case.jar sfdcConfig.xml\n");
 
     }
 
@@ -349,9 +368,9 @@ public class SalesforceAgent {
 
         synchronized(setServers) {
             iter = setServers.iterator();
-            StringBuffer sbMsg = new StringBuffer("Services still in operation:");
+            StringBuilder sbMsg = new StringBuilder("Services still in operation:");
             while(iter.hasNext()) {
-                sbMsg.append("\n   " + (String) iter.next());
+                sbMsg.append("\n   ").append((String) iter.next());
             }
             if(setServers.size() > 0) {
                 bReturn = true;
@@ -404,19 +423,18 @@ public class SalesforceAgent {
             LoginCredentials lc = new LoginCredentials(host, port, user, password);
 
 
-            StringBuffer sbMsgText = new StringBuffer(sText + "\n");
+            StringBuilder sbMsgText = new StringBuilder(sText + "\n");
             String[] asThisContext = asContext;
             if (asThisContext == null) {
                 asThisContext = getAgentContext();
             }
-
-            for(int i=0; i< asThisContext.length; i++) {
-                sbMsgText.append("\n" + asThisContext[i]);
+            for (String asThisContextStr : asThisContext) {
+                sbMsgText.append("\n").append(asThisContextStr);
             }
 
 
-            Class classNotification = Class.forName(classname);
-            Constructor constructor = classNotification.getConstructor(new Class[] {Class.forName("com.sforce.mail.LoginCredentials")});
+            Class<?> classNotification = Class.forName(classname);
+            Constructor<?> constructor = classNotification.getConstructor(new Class[] {Class.forName("com.sforce.mail.LoginCredentials")});
             Object objectNotification = constructor.newInstance(new Object[] { lc });
             if (objectNotification instanceof Notification) {
                 Notification notification = (Notification)objectNotification;
@@ -429,27 +447,30 @@ public class SalesforceAgent {
             } else {
                 throw new InvalidConfigurationException(ConfigurationExceptionCode.NOTIFICATION_CLASS_NOT_VALID, new String[] {classname});
             }
-        } catch (Throwable e) {
+        } catch (InvalidConfigurationException | ClassNotFoundException | 
+                 NoSuchMethodException | SecurityException | 
+                 InstantiationException | IllegalAccessException | 
+                 IllegalArgumentException | InvocationTargetException e) {
             logger.error(e.getMessage(), e);
         }
     }
 
     private static String [] getAgentContext() {
-        StringBuffer sbMsg = new StringBuffer();
-        sbMsg.append("\nSFDC Url:           " + SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pSFDC_LOGIN, ConfigParameters.pURL));
-        sbMsg.append("\nSFDC User ID:       " + SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pSFDC_LOGIN, ConfigParameters.pUSERNAME));
+        StringBuilder sbMsg = new StringBuilder();
+        sbMsg.append("\nSFDC Url:           ").append(SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pSFDC_LOGIN, ConfigParameters.pURL));
+        sbMsg.append("\nSFDC User ID:       ").append(SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pSFDC_LOGIN, ConfigParameters.pUSERNAME));
 
         String sRefresh = SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pSFDC_LOGIN, ConfigParameters.pLOGIN_REFRESH);
         if (sRefresh == null) {
             sRefresh = String.valueOf(GenericClient.defaultRefresh);
         }
-        sbMsg.append("\nSFDC Login Refresh: " + sRefresh);
+        sbMsg.append("\nSFDC Login Refresh: ").append(sRefresh);
 
         String sTimeout = SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pSFDC_LOGIN, ConfigParameters.pTIMEOUT);
         if (sTimeout == null) {
             sTimeout = String.valueOf(GenericClient.defaultTimeout);
         }
-        sbMsg.append("\nSFDC Timeout:       " + sTimeout);
+        sbMsg.append("\nSFDC Timeout:       ").append(sTimeout);
 
         /*
          * List all registered Timers polling mail servers...
@@ -459,7 +480,7 @@ public class SalesforceAgent {
         synchronized(setServers) {
             Iterator iter = setServers.iterator();
             while(iter.hasNext()) {
-                sbMsg.append("\n   " + (String) iter.next());
+                sbMsg.append("\n   ").append((String) iter.next());
             }
         }
 
@@ -533,6 +554,7 @@ public class SalesforceAgent {
 
     private static class ShutdownHook implements Runnable{
 
+        @Override
         public void run() {
             System.out.println("\nSalesforce.com Email to Case Agent Shutting down.\n\n");
         }
