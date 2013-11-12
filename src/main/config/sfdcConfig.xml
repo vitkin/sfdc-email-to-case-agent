@@ -21,6 +21,6 @@
         <largeAttachmentSize>0.5</largeAttachmentSize>
     </attachments>
     <services>
-        <com.sforce.mail.EmailService>C:\\EmailAgent\\email2case.xml</com.sforce.mail.EmailService>
+        <com.sforce.mail.EmailService>C:\\EmailAgent\\config\\email2case.xml</com.sforce.mail.EmailService>
     </services>
 </configFile>

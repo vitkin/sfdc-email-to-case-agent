@@ -9,13 +9,13 @@
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
  * that the following conditions are met:
  * 
- * 1) Redistributions of source code must retain the above copyright notice, this list of conditions and the
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
  *    following disclaimer.
  * 
- * 2) Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
  *    the following disclaimer in the documentation and/or other materials provided with the distribution.
  * 
- * 3) Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
+ * 3. Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
  *    promote products derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
@@ -37,35 +37,35 @@ package com.sforce.config;
 public interface ConfigParameters {
 
     //Sections
-    final String pLOGIN          		= "sfdcLogin";
-    final String pNOTIFY          		= "notify";
-    final String pATTACH         		= "attachments";
-    final String pSERVICES       		= "services";
-    final String pADMIN          		= "admin";
+    final String pLOGIN               = "sfdcLogin";
+    final String pNOTIFY              = "notify";
+    final String pATTACH              = "attachments";
+    final String pSERVICES            = "services";
+    final String pADMIN               = "admin";
 
-    final String pTIMEOUT         		= "timeout";
-    final String pURL             		= "url";
-    final String pLOGIN_REFRESH   		= "loginRefresh";
-    final String pNOTIFY_EMAIL    		= "notifyEmail";
-    final String pNOTIFY_ON_ERROR 		= "notifyonerror";
-    final String pFROM            		= "from";
+    final String pTIMEOUT             = "timeout";
+    final String pURL                 = "url";
+    final String pLOGIN_REFRESH       = "loginRefresh";
+    final String pNOTIFY_EMAIL        = "notifyEmail";
+    final String pNOTIFY_ON_ERROR     = "notifyonerror";
+    final String pFROM                = "from";
 
-    final String pUSERNAME        		= "userName";
-    final String pPASSWORD       		= "password";
-    final String pENCRYPTED_PASSWORD   	= "encryptedPassword";
-    final String pENCRYPTION_KEY_FILE  	= "encryptionKeyFile";
-    final String pPORT            		= "port";
-    final String pHOST            		= "host";
-    final String pUSER            		= "user";
-    final String pSERVICE         		= "service";
-    final String pSFDC_LOGIN      		= "sfdcLogin";
-    final String pPROTOCOL        		= "protocol";
-    final String pINTERVAL        		= "interval";
-    final String pINBOX           		= "inbox";
-    final String pREADBOX         		= "readbox";
-    final String pERRORBOX        		= "errorbox";
+    final String pUSERNAME            = "userName";
+    final String pPASSWORD            = "password";
+    final String pENCRYPTED_PASSWORD  = "encryptedPassword";
+    final String pENCRYPTION_KEY_FILE = "encryptionKeyFile";
+    final String pPORT                = "port";
+    final String pHOST                = "host";
+    final String pUSER                = "user";
+    final String pSERVICE             = "service";
+    final String pSFDC_LOGIN          = "sfdcLogin";
+    final String pPROTOCOL            = "protocol";
+    final String pINTERVAL            = "interval";
+    final String pINBOX               = "inbox";
+    final String pREADBOX             = "readbox";
+    final String pERRORBOX            = "errorbox";
 
-    final String pATTACH_DIR      		= "largeAttachmentDirectory";
-    final String pATTACH_URL      		= "largeAttachmentURLPrefix";
-    final String pATTACH_SIZE     		= "largeAttachmentSize";
+    final String pATTACH_DIR          = "largeAttachmentDirectory";
+    final String pATTACH_URL          = "largeAttachmentURLPrefix";
+    final String pATTACH_SIZE         = "largeAttachmentSize";
 }

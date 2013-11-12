@@ -5,8 +5,8 @@
         <userName>user</userName>
         <password>password</password>
         <interval>10</interval>
-        <inbox>testInbox</inbox>
-        <readbox>testProcessing0</readbox>
-        <errorbox>testError</errorbox>
+        <inbox>test/Inbox</inbox>
+        <readbox>test/Processing0</readbox>
+        <errorbox>test/Error</errorbox>
     </server1>
 </configFile>

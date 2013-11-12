@@ -16,17 +16,17 @@
     <file>
       <source>${project.build.directory}/${project.build.finalName}.jar</source>
       <outputDirectory>EmailAgent</outputDirectory>
-      <destName>Email2Case.jar</destName>
+      <destName>sfdc-email-to-case-agent.jar</destName>
     </file>
     <file>
       <source>${project.build.directory}/${project.build.finalName}-sources.jar</source>
       <outputDirectory>EmailAgent</outputDirectory>
-      <destName>Email2Case-src.jar</destName>
+      <destName>sfdc-email-to-case-agent-src.jar</destName>
     </file>
     <file>
       <source>${project.build.directory}/${project.build.finalName}-javadoc.jar</source>
       <outputDirectory>EmailAgent</outputDirectory>
-      <destName>Email2Case-doc.jar</destName>
+      <destName>sfdc-email-to-case-agent-doc.jar</destName>
     </file>
   </files>
 
@@ -47,18 +47,20 @@
 
     <fileSet>
       <directory>src/main/config</directory>
-      <outputDirectory>EmailAgent</outputDirectory>
+      <outputDirectory>EmailAgent/config</outputDirectory>
       <includes>
         <include>*</include>
       </includes>
+      <filtered>true</filtered>
     </fileSet>
 
     <fileSet>
       <directory></directory>
       <outputDirectory>EmailAgent</outputDirectory>
       <includes>
-        <include>README.txt</include>
+        <include>README.md</include>
       </includes>
+      <filtered>true</filtered>
     </fileSet>
   </fileSets>
 

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC '-//APACHE//DTD LOG4J 1.2//EN' 'http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd'>
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+    
+    <!-- Appenders configuration -->
+    
+    <!-- CONSOLE is set to be a ConsoleAppender using a PatternLayout. -->
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <param  name="Threshold" value="INFO"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d [%t] %-5p %m%n"/>
+        </layout>
+    </appender>
+    
+    <!-- LOGFILE is set to be a File appender using a PatternLayout. -->
+    <appender name="LOGFILE" class="org.apache.log4j.RollingFileAppender">
+        <param name="Append" value="true"/>
+        <param name="File" value="log/SalesforceAgent.log"/>
+        <param name="maxFileSize" value="10MB"/>
+        <param name="Threshold" value="DEBUG"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-4r [%t] %-5p %c %x - %m%n"/>
+        </layout>
+    </appender>
+    
+    <!-- PERFFILE is set to be a File appender using a PatternLayout. -->
+    <appender name="PERFFILE" class="org.apache.log4j.FileAppender">
+        <param name="Append" value="true"/>
+        <param name="File" value="log/wsc.log"/>
+        <param name="Threshold" value="DEBUG"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%m%n"/>
+        </layout>
+    </appender>
+    
+    <!-- Loggers configuration -->
+	
+	<!-- PERFFILE -->
+    <!-- uncomment this to turn on soap api perf logging -->
+    <!--
+    <logger name="com.sforce.ws">
+        <level value="debug"/>
+        <appender-ref ref="PERFFILE"/>
+    </logger>
+    -->
+    
+    <!-- Root configuration -->
+    <!-- Set root category priority to INFO and its appenders to CONSOLE and LOGFILE. -->
+    <root>
+        <level value="info"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOGFILE"/>
+    </root>
+    
+</log4j:configuration>
