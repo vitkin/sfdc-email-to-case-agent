@@ -5,6 +5,7 @@
         <userName>user</userName>
         <password>password</password>
         <interval>10</interval>
+        <timeout>5</timeout>
         <inbox>test/Inbox</inbox>
         <readbox>test/Processing0</readbox>
         <errorbox>test/Error</errorbox>

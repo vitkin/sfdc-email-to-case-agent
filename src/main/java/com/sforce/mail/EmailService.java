@@ -49,6 +49,7 @@ public class EmailService extends SalesforceService {
     private static final String pUSERID         = "   UserID  : ";
     private static final String pPASSWORD       = "   Password: ";
     private static final String pINTERVAL       = "   Interval: ";
+    private static final String pTIMEOUT        = "   TimeOut : ";
     private static final String pINBOX          = "   InBox   : ";
     private static final String pREADBOX        = "   ReadBox : ";
     private static final String pERRORBOX       = "   ErrorBox: ";
@@ -75,6 +76,8 @@ public class EmailService extends SalesforceService {
 
                     // How often does the agent look for new mail on the mail server
                     String interval = config.get(server, ConfigParameters.pINTERVAL);
+                    // For how long does the agent look for new mail on the mail server
+                    String timeout = config.get(server, ConfigParameters.pTIMEOUT);
                     // What's the name of the inbox to look for email in
                     String inbox = config.get(server, ConfigParameters.pINBOX);
                     // Where should messages be moved after they are read
@@ -117,6 +120,8 @@ public class EmailService extends SalesforceService {
                     // Mail Service Polling interval
                     interval = promptArgument(interval,"Polling Interval in Minutes");
 
+                    // Mail Service Polling time out
+                    timeout = promptArgument(timeout,"Polling TimeOut in Minutes");
 
                     // Mail Service Inbox
                     inbox = promptArgument(inbox,"Mailbox for incoming messages");
@@ -143,6 +148,14 @@ public class EmailService extends SalesforceService {
                         throw new InvalidConfigurationException(ConfigurationExceptionCode.MAIL_INTERVAL_NOT_VALID,e);
                     }
                     if (howOftenMinutes<1) throw new InvalidConfigurationException(ConfigurationExceptionCode.MAIL_INTERVAL_NOT_VALID);
+
+                    int howLongMinutes = 10;    // This is just the default if there's no value in the config file.
+                    try {
+                        howLongMinutes = Integer.parseInt(timeout);
+                    } catch (NumberFormatException e) {
+						            throw new InvalidConfigurationException(ConfigurationExceptionCode.MAIL_TIMEOUT_NOT_VALID, e);
+                    }
+                    if (howLongMinutes < 1) throw new InvalidConfigurationException(ConfigurationExceptionCode.MAIL_TIMEOUT_NOT_VALID);
 
                     if (null == inbox || null == readbox || null == errorbox || null == pass || null == user || null == url) {
                         logger.error("Mailbox settings not configured correctly.  Unable to launch server.");
@@ -171,13 +184,14 @@ public class EmailService extends SalesforceService {
                         c.setReadbox(readbox);
                         c.setErrorbox(errorbox);
 
-                        SalesforceWorker worker = new EmailWorker(c);
+                        SalesforceWorker worker = new EmailWorker(c, howLongMinutes * 60 * 1000);
 
                         logger.info(pSCHEDULE_POLL + url);
                         logger.info(pPORT + (port.equals("0") ? "default" : port) );
                         logger.info(pUSERID + user);
                         logger.info(pPASSWORD);
                         logger.info(pINTERVAL + interval + pMINUTES);
+                        logger.info(pTIMEOUT + timeout + pMINUTES);
                         logger.info(pINBOX + inbox);
                         logger.info(pREADBOX + readbox);
                         logger.info(pERRORBOX + errorbox);
@@ -209,14 +223,28 @@ public class EmailService extends SalesforceService {
 
     private static class EmailWorker extends SalesforceWorker {
         private final GenericClient client;
-        private EmailWorker(GenericClient c) {
-            this.client = c;
+        private final int timeout;
+        private EmailWorker(GenericClient c, int t) {
+            client = c;
+            timeout = t;
         }
 
         @Override
         public void run() {
             if(!client.isShutdown()) {
-                client.receive();
+                final Thread t = new Thread(client);
+                t.start();
+
+                try {
+                    t.join(timeout);
+                } catch (InterruptedException ex) {
+                    logger.error(ex, ex);
+                }
+
+                if (t.isAlive()) {
+                    logger.error("Time out! Interrupting mail client operation...");
+                    t.interrupt();
+                }
             } else {
                 logger.info("Shutting down service...");
                 logger.info(client.toString());

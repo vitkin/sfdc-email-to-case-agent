@@ -85,7 +85,7 @@ import org.apache.log4j.Logger;
  * @author Victor Itkin
  * @since 140
  */
-public abstract class GenericClient {
+public abstract class GenericClient implements Runnable {
     private static final String EMAIL_TO_CASE_NOT_ENABLED = "Email-to-Case is not enabled for your organization!";
     private static final String EMAIL_TO_CASE_ROUTING_INCORRECT = "Routing Addresses are not set up correctly to run Email To Case.";
     private static final String pSHUTTING_DOWN_CONNECTION_TO_MAIL_SYSTEM = "Shutting down connection to mail system.";
@@ -459,7 +459,8 @@ public abstract class GenericClient {
      * If there is an API error, the meesages are flagged and copied to the
      * error folder for IMAP mail systems.
      */
-    public void receive() {
+    @Override
+    public void run() {
         synchronized(this){
             if(! isOkToContinue()){
                 return;

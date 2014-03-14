@@ -49,6 +49,7 @@ public class InvalidConfigurationException extends Exception {
         MAIL_AUTHENTICATION_ERROR("Invalid mail service username or password in configuration.", true, false),
         MAIL_FOLDER_NOT_FOUND("A mail folder provided is not valid.", true, false),
         MAIL_INTERVAL_NOT_VALID("The mail polling interval specified in the conguration file is not valid. It must be an integer greater than or equal to 1.", true, true),
+        MAIL_TIMEOUT_NOT_VALID("The mail polling timeout specified in the conguration file is not valid. It must be an integer greater than or equal to 1.", true, true),
 
         SFDC_CFG_FILE_LOAD_FAILURE("Failed to load salesforce.com configuration file.", true, true),
         SFDC_URL_NOT_FOUND("No configuration value was found for the salesforce.com service url.", false, false),
