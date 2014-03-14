@@ -15,17 +15,17 @@
     <!-- adds jar package to the root directory of zip package -->
     <file>
       <source>${project.build.directory}/${project.build.finalName}.jar</source>
-      <outputDirectory>EmailAgent</outputDirectory>
+      <outputDirectory>sfdc-email-to-case-agent</outputDirectory>
       <destName>sfdc-email-to-case-agent.jar</destName>
     </file>
     <file>
       <source>${project.build.directory}/${project.build.finalName}-sources.jar</source>
-      <outputDirectory>EmailAgent</outputDirectory>
+      <outputDirectory>sfdc-email-to-case-agent</outputDirectory>
       <destName>sfdc-email-to-case-agent-src.jar</destName>
     </file>
     <file>
       <source>${project.build.directory}/${project.build.finalName}-javadoc.jar</source>
-      <outputDirectory>EmailAgent</outputDirectory>
+      <outputDirectory>sfdc-email-to-case-agent</outputDirectory>
       <destName>sfdc-email-to-case-agent-doc.jar</destName>
     </file>
   </files>
@@ -38,7 +38,7 @@
     -->
     <fileSet>
       <directory>${project.build.scriptSourceDirectory}</directory>
-      <outputDirectory>EmailAgent</outputDirectory>
+      <outputDirectory>sfdc-email-to-case-agent/bin</outputDirectory>
       <includes>
         <include>*</include>
       </includes>
@@ -47,7 +47,7 @@
 
     <fileSet>
       <directory>src/main/config</directory>
-      <outputDirectory>EmailAgent/config</outputDirectory>
+      <outputDirectory>sfdc-email-to-case-agent/config</outputDirectory>
       <includes>
         <include>*</include>
       </includes>
@@ -56,7 +56,7 @@
 
     <fileSet>
       <directory></directory>
-      <outputDirectory>EmailAgent</outputDirectory>
+      <outputDirectory>sfdc-email-to-case-agent</outputDirectory>
       <includes>
         <include>README.md</include>
       </includes>
@@ -72,7 +72,7 @@
           it is added to the root directory of the zip package.
       -->
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>EmailAgent/lib</outputDirectory>
+      <outputDirectory>sfdc-email-to-case-agent/lib</outputDirectory>
       <unpack>false</unpack>
     </dependencySet>
   </dependencySets>
