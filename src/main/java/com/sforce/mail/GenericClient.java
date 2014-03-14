@@ -30,14 +30,34 @@
  */
 package com.sforce.mail;
 
+import com.sforce.SalesforceAgent;
+import com.sforce.config.ConfigInfo;
+import com.sforce.config.ConfigParameters;
+import com.sforce.exception.FailedBindingException;
+import com.sforce.exception.InvalidConfigurationException;
+import com.sforce.exception.InvalidConfigurationException.ConfigurationExceptionCode;
+import com.sforce.soap.partner.fault.wsc.ApiFault;
+import com.sforce.soap.partner.fault.wsc.ExceptionCode;
+import com.sforce.soap.partner.fault.wsc.LoginFault;
+import com.sforce.soap.partner.wsc.Connector;
+import com.sforce.soap.partner.wsc.DebugLevel;
+import com.sforce.soap.partner.wsc.Error;
+import com.sforce.soap.partner.wsc.HandledEmailMessage;
+import com.sforce.soap.partner.wsc.LoginResult;
+import com.sforce.soap.partner.wsc.PartnerConnection;
+import com.sforce.soap.partner.wsc.SaveResult;
+import com.sforce.util.EncryptionUtil;
+import com.sforce.ws.ConnectionException;
+import com.sforce.ws.ConnectorConfig;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -46,7 +66,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
-
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -54,33 +73,16 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
-
+import org.apache.commons.exec.LogOutputStream;
+import org.apache.log4j.Appender;
+import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
-
-import com.sforce.SalesforceAgent;
-import com.sforce.config.ConfigParameters;
-import com.sforce.exception.FailedBindingException;
-import com.sforce.exception.InvalidConfigurationException;
-import com.sforce.exception.InvalidConfigurationException.ConfigurationExceptionCode;
-import com.sforce.soap.partner.wsc.Connector;
-import com.sforce.soap.partner.wsc.HandledEmailMessage;
-import com.sforce.soap.partner.wsc.LoginResult;
-import com.sforce.soap.partner.wsc.PartnerConnection;
-import com.sforce.soap.partner.wsc.SaveResult;
-import com.sforce.soap.partner.wsc.Error;
-import com.sforce.util.EncryptionUtil;
-
-import com.sforce.soap.partner.fault.wsc.ApiFault;
-import com.sforce.soap.partner.fault.wsc.ExceptionCode;
-import com.sforce.soap.partner.fault.wsc.LoginFault;
-import com.sforce.config.ConfigInfo;
-import com.sforce.ws.ConnectionException;
-import com.sforce.ws.ConnectorConfig;
 
 /**
  * @author Echan
  * @author CSpeer
  * @author pdebaty
+ * @author Victor Itkin
  * @since 140
  */
 public abstract class GenericClient {
@@ -131,8 +133,21 @@ public abstract class GenericClient {
     private static boolean firstTime = true;
 
     //Logging
-    static Logger logger = Logger.getLogger(GenericClient.class.getName());
+    private static final Logger logger = Logger.getLogger(GenericClient.class.getName());
+    private static final Logger mLogger = Logger.getLogger("javax.mail");
+    private static final Logger wLogger = Logger.getLogger("com.sforce.soap.partner");
 
+    private static final String PARTNER_SOAP_TRACE_FILE;
+
+    static {
+        final Appender a = wLogger.getAppender("PARTNER_SOAP_TRACE_FILE");
+
+        if (a != null && a instanceof FileAppender) {
+            PARTNER_SOAP_TRACE_FILE = ((FileAppender) a).getFile();
+        } else {
+            PARTNER_SOAP_TRACE_FILE = null;
+        }
+    }
 
     /**
      * @param loginCredentials
@@ -281,6 +296,16 @@ public abstract class GenericClient {
 
         try {
             ConnectorConfig config = new ConnectorConfig();
+            
+            if (PARTNER_SOAP_TRACE_FILE != null) {
+                try {
+                    config.setTraceFile(PARTNER_SOAP_TRACE_FILE);
+                    config.setTraceMessage(true);
+                    config.setPrettyPrintXml(true);
+                } catch (FileNotFoundException ex) {
+                    logger.error(ex, ex);
+                }
+            }
 
             // retrieve the sfdc config info from sfdc config file.
             // Note: these are different from loginCredentials, which are the mail server credentials, not sfdc.
@@ -317,7 +342,12 @@ public abstract class GenericClient {
             config.setConnectionTimeout(this.sfdcTimeout);
             //need to do a manual login to set the proper headers
             config.setManualLogin(true);
-            this.conn = Connector.newConnection(config);
+            conn = Connector.newConnection(config);
+
+            if (logger.isDebugEnabled()) {
+                conn.setDebuggingHeader(DebugLevel.Db);
+            }
+
             conn.setCallOptions("EmailAgent/" + SalesforceAgent.SALESFORCE_AGENT_VERSION, "");
             conn.setAssignmentRuleHeader(null, true);
             //Note: no email header needed for email2case client because the proper behavior is
@@ -326,6 +356,11 @@ public abstract class GenericClient {
             if(config.getSessionId() == null) {
                 config.setServiceEndpoint(config.getAuthEndpoint());
                 LoginResult loginresult = conn.login(config.getUsername(), config.getPassword());
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug(conn.getDebuggingInfo().getDebugLog());
+                }
+  
                 config.setSessionId(loginresult.getSessionId());
                 config.setServiceEndpoint(loginresult.getServerUrl());
             } else if(config.getServiceEndpoint() == null)
@@ -445,6 +480,18 @@ public abstract class GenericClient {
                 // -- Get hold of the default session --
                 Properties props = System.getProperties();
                 session = Session.getDefaultInstance(props, null);
+
+                if (mLogger.isDebugEnabled()) {
+                    session.setDebugOut(new PrintStream(new LogOutputStream() {
+                        @Override
+                        protected void processLine(String line, int level) {
+                            mLogger.debug(line);
+                        }
+                    }));
+
+                    session.setDebug(true);
+                }
+
                 store = connectToMailServer(session);
 
                 if (store != null) {
@@ -491,7 +538,6 @@ public abstract class GenericClient {
                     if (store != null) store.close();
                 } catch (Exception ex2) {
                     logger.error(ex2, ex2);
-                    ex2.printStackTrace();
                 }
             }
         } catch (InterruptedException ie) {
@@ -729,6 +775,10 @@ public abstract class GenericClient {
             for(int i = 0; i< records.length; i++) {
                 try {
                     conn.handleEmailMessage(new HandledEmailMessage[] {records[i]});
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(conn.getDebuggingInfo().getDebugLog());
+                    }
                 }
                 catch (Exception ex) {
                     inbox.copyMessages(new Message[] {messages[i]}, errorbox);
@@ -901,7 +951,7 @@ public abstract class GenericClient {
             logger.debug(message);
             logger.debug("-------------------------------------------------------------------");
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error(ex, ex);
         }
     }
 

@@ -23,10 +23,20 @@
         </layout>
     </appender>
     
-    <!-- PERFFILE is set to be a File appender using a PatternLayout. -->
-    <appender name="PERFFILE" class="org.apache.log4j.FileAppender">
+    <!-- JAVA_MAIL_TRACE_FILE is set to be a File appender using a PatternLayout. -->
+    <appender name="JAVA_MAIL_TRACE_FILE" class="org.apache.log4j.FileAppender">
         <param name="Append" value="true"/>
-        <param name="File" value="log/wsc.log"/>
+        <param name="File" value="log/java-mail-trace.log"/>
+        <param name="Threshold" value="DEBUG"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-4r [%t] %-5p %c %x - %m%n"/>
+        </layout>
+    </appender>
+    
+    <!-- PARTNER_SOAP_TRACE_FILE is set to be a File appender using a PatternLayout. -->
+    <appender name="PARTNER_SOAP_TRACE_FILE" class="org.apache.log4j.FileAppender">
+        <param name="Append" value="true"/>
+        <param name="File" value="log/partner-soap-trace.log"/>
         <param name="Threshold" value="DEBUG"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%m%n"/>
@@ -35,12 +45,21 @@
     
     <!-- Loggers configuration -->
 	
-	<!-- PERFFILE -->
+    <!-- JAVA_MAIL_TRACE_FILE -->
+    <!-- uncomment this to turn on javamail logging -->
+    <!--
+    <logger name="javax.mail" additivity="false">
+        <level value="debug"/>
+        <appender-ref ref="JAVA_MAIL_TRACE_FILE"/>
+    </logger>
+    -->
+    
+    <!-- PARTNER_SOAP_TRACE_FILE -->
     <!-- uncomment this to turn on soap api perf logging -->
     <!--
-    <logger name="com.sforce.ws">
+    <logger name="com.sforce.soap.partner" additivity="false">
         <level value="debug"/>
-        <appender-ref ref="PERFFILE"/>
+        <appender-ref ref="PARTNER_SOAP_TRACE_FILE"/>
     </logger>
     -->
     
@@ -48,7 +67,7 @@
     <!-- Set root category priority to INFO and its appenders to CONSOLE and LOGFILE. -->
     <root>
         <level value="info"/>
-        <appender-ref ref="CONSOLE"/>
+        <!--<appender-ref ref="CONSOLE"/>-->
         <appender-ref ref="LOGFILE"/>
     </root>
     
