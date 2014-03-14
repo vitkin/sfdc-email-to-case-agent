@@ -6,7 +6,6 @@
 
   <groupId>com.sforce</groupId>
   <artifactId>sfdc-email-to-case-agent</artifactId>
-  <packaging>jar</packaging>
 
   <name>SFDC Email-to-Case Agent</name>
 
@@ -26,8 +25,6 @@
   </licenses>
 
   <build>
-    <defaultGoal>clean package</defaultGoal>
-    
     <pluginManagement>
       <plugins>
         <!--This plugin's configuration is used to store Eclipse m2e settings
@@ -62,6 +59,37 @@
 
     <plugins>
       <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>2.1.9</version>
+        <configuration>
+          <dateFormat>dd.MM.yyyy '@' HH:mm:ss Z</dateFormat>
+          <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+          <excludeProperties>
+            <excludeProperty>git.commit.user.email</excludeProperty>
+            <excludeProperty>git.commit.message.full</excludeProperty>
+            <excludeProperty>git.commit.message.short</excludeProperty>
+            <excludeProperty>git.remote.origin.url</excludeProperty>
+          </excludeProperties>
+          <gitDescribe>
+            <skip>false</skip>
+            <always>false</always>
+            <abbrev>7</abbrev>
+            <dirty>-dirty</dirty>
+            <forceLongFormat>false</forceLongFormat>
+          </gitDescribe>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>com.atlassian.maven.plugins</groupId>
         <artifactId>maven-jgitflow-plugin</artifactId>
         <version>1.0-alpha27</version>
@@ -92,7 +120,6 @@
           </includes>
           <excludes>
             <exclude>**/*.properties</exclude>
-            <exclude>**/*.sql</exclude>
             <exclude>**/*.xml</exclude>
           </excludes>
         </configuration>
@@ -172,7 +199,6 @@
     <profile>
       <id>create-distribution</id>
       <build>
-        <!--<finalName>EmailAgent</finalName>-->
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -291,6 +317,11 @@
       <groupId>com.sforce.sfdc-wsc</groupId>
       <artifactId>sfdc-wsc-ws-partner-email</artifactId>
       <version>29.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-exec</artifactId>
+      <version>1.2</version>
     </dependency>
   </dependencies>
 

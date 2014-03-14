@@ -54,16 +54,20 @@ import com.sforce.exception.InvalidConfigurationException.ConfigurationException
 import org.apache.log4j.Logger;
 
 public class SalesforceAgent {
-    
+
     //Logging
     private static final Logger logger = Logger.getLogger(SalesforceAgent.class);
     
     private static final String pJAVA_SYS_PROPS = "             J A V A    S Y S T E M   P R O P E R T I E S";
+
     // The SALESFORCE_AGENT_VERSION must be in Major.Minor version(1.x, not 1.x.1) so that it appears correctly in the Login History
     public static final String SALESFORCE_AGENT_VERSION;
-    
+
+    public static final String GIT_COMMIT_ID_DESCRIBE;
+    public static final String GIT_BUILD_TIME;
+
     static {
-        Properties pom = new Properties();
+        final Properties pom = new Properties();
         
         try {
             pom.load(SalesforceAgent.class.getResourceAsStream(
@@ -75,9 +79,25 @@ public class SalesforceAgent {
         }
         
         SALESFORCE_AGENT_VERSION = pom.getProperty("version", "#.#");
+
+        final Properties git = new Properties();
+
+        try {
+          git.load(SalesforceAgent.class.getResourceAsStream(
+                "/git.properties"));
+        }
+        catch (IOException | NullPointerException ex) {
+            logger.warn("Couldn't retrieve the version!", ex);
+        }
+
+        GIT_COMMIT_ID_DESCRIBE = git.getProperty("git.commit.id.describe", "");
+        GIT_BUILD_TIME = git.getProperty("git.build.time", "");
     }
     
-    public static final String SALESFORCE_AGENT_VERSION_MSG = "SFDC Email-to-Case Agent v" + SALESFORCE_AGENT_VERSION;
+    public static final String SALESFORCE_AGENT_VERSION_MSG =
+      "SFDC Email-to-Case Agent v" + SALESFORCE_AGENT_VERSION +
+      " ("+ GIT_COMMIT_ID_DESCRIBE + " - " + GIT_BUILD_TIME + ")";
+
     private static final double[] SUPPORTED_SALESFORCE_API_VERSIONS = { 29.0 };
 
     public static ConfigInfo GLOBAL_CONFIG;
@@ -86,7 +106,10 @@ public class SalesforceAgent {
     private static final Set<String> setServers = Collections.synchronizedSet(new HashSet<String>(3));
 
     // Strings
-    private static final String pSTART_UP_MESSAGE      = "Starting SFDC Email-to-Case Agent v" + SALESFORCE_AGENT_VERSION;
+    private static final String pSTART_UP_MESSAGE      = 
+      "Starting SFDC Email-to-Case Agent v" + SALESFORCE_AGENT_VERSION +
+      " ("+ GIT_COMMIT_ID_DESCRIBE + " - " + GIT_BUILD_TIME + ")";
+
     private static final String pSHUTDOWN_MESSAGE      = "SFDC Email-to-Case Agent Shut Down.";
     private static final String pLOADING_CFG_FILE      = "Loading configuration file ";
     private static final String pFATAL_ERROR           = "FATAL EXCEPTION";
