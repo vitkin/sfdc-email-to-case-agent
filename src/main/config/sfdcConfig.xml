@@ -7,20 +7,20 @@
         <timeout>600</timeout>
     </sfdcLogin>
     <notify>
-	    <notifyEmail>admin@your_company.com, E2CSupport@your_company.com</notifyEmail>
+        <notifyEmail>admin@your_company.com, E2CSupport@your_company.com</notifyEmail>
         <from>sample_user@your_company.com</from>
         <host>smtp.mail.your_company.com</host>
-		<port>25</port>
+        <port>465</port>
         <user>sample_user</user>
         <password>123456</password>
-        <service>com.sforce.mail.SMTPNotification</service>
+        <service>com.sforce.mail.SMTPNotificationAuth</service>
     </notify>
     <attachments>
-        <largeAttachmentDirectory>\\files\Departments\Development\Users\joe\</largeAttachmentDirectory>
-        <largeAttachmentURLPrefix>file:\\files\Departments\Development\Users\joe\</largeAttachmentURLPrefix>
+        <largeAttachmentDirectory>files/Departments/Development/Users/joe/</largeAttachmentDirectory>
+        <largeAttachmentURLPrefix>https://server/files/Departments/Development/Users/joe/</largeAttachmentURLPrefix>
         <largeAttachmentSize>0.5</largeAttachmentSize>
     </attachments>
     <services>
-        <com.sforce.mail.EmailService>C:\\EmailAgent\\config\\email2case.xml</com.sforce.mail.EmailService>
+        <com.sforce.mail.EmailService>config/email2case.xml</com.sforce.mail.EmailService>
     </services>
 </configFile>

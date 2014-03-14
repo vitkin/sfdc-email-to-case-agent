@@ -14,7 +14,11 @@ JAVA_OPTS="-server \
            -Dlog4j.configuration=file:$LOG4J_CONFIG_FILE \
            -Dlog4j.debug \
            -Dmail.imap.connectiontimeout=900000 \
-           -Dmail.imap.timeout=750000"
+           -Dmail.imap.timeout=750000 \
+           -Dmail.smtp.connectiontimeout=900000 \
+           -Dmail.smtp.timeout=750000 \
+           -Dmail.smtp.ssl.enable=true \
+           -Dmail.smtp.starttls.enable=true"
 
 EMAIL2CASE_HOME=$(dirname "${0}")/..
 

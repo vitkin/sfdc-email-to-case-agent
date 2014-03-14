@@ -103,7 +103,7 @@ public class SMTPNotification extends Notification {
             logErrors(null);
         }
 
-        Properties p = new Properties();
+        Properties p = System.getProperties();
         p.put("mail.host", this.getServerName());
         p.put("mail.user", this.getUserName());
 

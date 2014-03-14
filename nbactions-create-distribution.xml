@@ -2,6 +2,9 @@
 <actions>
   <action>
     <actionName>run</actionName>
+    <packagings>
+      <packaging>jar</packaging>
+    </packagings>
     <goals>
       <goal>process-classes</goal>
       <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
@@ -13,6 +16,9 @@
   </action>
   <action>
     <actionName>debug</actionName>
+    <packagings>
+      <packaging>jar</packaging>
+    </packagings>
     <goals>
       <goal>process-classes</goal>
       <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
@@ -25,13 +31,16 @@
   </action>
   <action>
     <actionName>profile</actionName>
+    <packagings>
+      <packaging>jar</packaging>
+    </packagings>
     <goals>
       <goal>process-classes</goal>
       <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
     </goals>
     <properties>
       <exec.args>-Xmx256M -Dlog4j.debug -Dlog4j.configuration=file:config/log4j.xml -Dmail.imap.connectiontimeout=900000 -Dmail.imap.timeout=750000 -Dmail.smtp.connectiontimeout=900000 -Dmail.smtp.timeout=750000 -Dmail.smtp.ssl.enable=true -Dmail.smtp.starttls.enable=true -classpath %classpath com.sforce.SalesforceAgent config/sfdcConfig.xml</exec.args>
-      <exec.executable>${profiler.java}</exec.executable>
+      <exec.executable>java</exec.executable>
     </properties>
   </action>
 </actions>
