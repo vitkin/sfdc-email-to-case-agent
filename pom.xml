@@ -66,11 +66,17 @@
           <dateFormat>dd.MM.yyyy '@' HH:mm:ss Z</dateFormat>
           <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
           <generateGitPropertiesFile>true</generateGitPropertiesFile>
-          <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+          <generateGitPropertiesFilename>target/classes/META-INF/git.properties</generateGitPropertiesFilename>
           <excludeProperties>
-            <excludeProperty>git.commit.user.email</excludeProperty>
+            <excludeProperty>git.branch</excludeProperty>
+            <excludeProperty>git.build.user.name</excludeProperty>
+            <excludeProperty>git.build.user.email</excludeProperty>
+            <excludeProperty>git.commit.id.abbrev</excludeProperty>
             <excludeProperty>git.commit.message.full</excludeProperty>
             <excludeProperty>git.commit.message.short</excludeProperty>
+            <excludeProperty>git.commit.time</excludeProperty>
+            <excludeProperty>git.commit.user.name</excludeProperty>
+            <excludeProperty>git.commit.user.email</excludeProperty>
             <excludeProperty>git.remote.origin.url</excludeProperty>
           </excludeProperties>
           <gitDescribe>

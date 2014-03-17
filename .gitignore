@@ -5,7 +5,6 @@
 /evidence/
 /log/
 *.log
-/src/main/resources/git.properties
 
 ### Maven ###
 target/

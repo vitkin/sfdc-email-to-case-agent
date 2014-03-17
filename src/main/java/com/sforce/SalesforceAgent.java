@@ -84,7 +84,7 @@ public class SalesforceAgent {
 
         try {
           git.load(SalesforceAgent.class.getResourceAsStream(
-                "/git.properties"));
+                "/META-INF/git.properties"));
         }
         catch (IOException | NullPointerException ex) {
             logger.warn("Couldn't retrieve the version!", ex);
