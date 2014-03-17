@@ -30,17 +30,23 @@
  */
 package com.sforce.mail;
 
-import java.io.IOException;
 import com.sforce.SalesforceAgent;
 import com.sforce.SalesforceService;
 import com.sforce.SalesforceWorker;
 import com.sforce.config.ConfigInfo;
+import com.sforce.config.ConfigParameters;
 import com.sforce.exception.InvalidConfigurationException;
 import com.sforce.exception.InvalidConfigurationException.ConfigurationExceptionCode;
 import com.sforce.util.ConsoleReader;
-
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.apache.log4j.Logger;
-import com.sforce.config.ConfigParameters;
 
 public class EmailService extends SalesforceService {
 
@@ -224,34 +230,46 @@ public class EmailService extends SalesforceService {
     private static class EmailWorker extends SalesforceWorker {
         private final GenericClient client;
         private final int timeout;
+        private final String user;
+        private final ExecutorService executor;
+
         private EmailWorker(GenericClient c, int t) {
             client = c;
             timeout = t;
+            user = client.getUser();
+
+            final ThreadFactory tf = new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "Client - " + user);
+                }
+            };
+
+            executor = Executors.newSingleThreadExecutor(tf);
         }
 
         @Override
         public void run() {
             if(!client.isShutdown()) {
-                final Thread t = new Thread(client);
-                t.start();
+                final Future f = executor.submit(client);
 
                 try {
-                    t.join(timeout);
-                } catch (InterruptedException ex) {
-                    logger.error(ex, ex);
+                    f.get(timeout, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException | ExecutionException ex) {
+                    logger.error("Excpetion for client " + user, ex);
                 }
-
-                if (t.isAlive()) {
-                    logger.error("Time out! Interrupting mail client operation...");
-                    t.interrupt();
+                catch (TimeoutException ex) {
+                    logger.error("Time out! Interrupting mail client " + user + "...", ex);
+                    f.cancel(true);
                 }
             } else {
-                logger.info("Shutting down service...");
-                logger.info(client.toString());
-                SalesforceAgent.deRegisterServer(client.getUrl() + ":" + client.getPort() + ":" + client.getUser() + ":" + client.getInbox());
-                this.cancel();
+                logger.info("Shutting down service for client:\n" + client);
+
+                SalesforceAgent.deRegisterServer(client.getUrl() + ":" + 
+                    client.getPort() + ":" + user + ":" + client.getInbox());
+
+                cancel();
             }
         }
     }
-
 }
