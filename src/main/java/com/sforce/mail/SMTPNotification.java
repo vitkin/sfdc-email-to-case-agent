@@ -72,6 +72,12 @@ public class SMTPNotification extends Notification {
      */
     @Override
     public void sendNotification() {
+        logger.warn("Sending new notication:" +
+                    "\n\n  From:\n  " + getFrom() +
+                    "\n\n  To:\n  " + getTo() +
+                    "\n\n  Subject:\n  " + getDescription() + 
+                    "\n\n  Text:\n  " + getMessageText());
+
         // Create new message
         try {
             MimeMessage msg = new MimeMessage(getMailSession());

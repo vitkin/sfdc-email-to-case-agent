@@ -66,7 +66,7 @@ public class SMTPNotificationAuth extends SMTPNotification {
 
     private static class SMTPAuthenticator extends javax.mail.Authenticator {
 
-        private LoginCredentials loginCredentials;
+        private final LoginCredentials loginCredentials;
         public SMTPAuthenticator(LoginCredentials loginCredentials) {
             super();
             logger.info("Generating SMTP Authentication Request");
