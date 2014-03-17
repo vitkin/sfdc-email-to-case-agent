@@ -256,7 +256,7 @@ public class EmailService extends SalesforceService {
                 try {
                     f.get(timeout, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException | ExecutionException ex) {
-                    logger.error("Excpetion for client " + user, ex);
+                    logger.error("Exception for client " + user, ex);
                 }
                 catch (TimeoutException ex) {
                     logger.error("Time out! Interrupting mail client " + user + "...", ex);

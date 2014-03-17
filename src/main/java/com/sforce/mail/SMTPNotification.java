@@ -72,7 +72,7 @@ public class SMTPNotification extends Notification {
      */
     @Override
     public void sendNotification() {
-        logger.warn("Sending new notication:" +
+        logger.warn("Sending new notification:" +
                     "\n\n  From:\n  " + getFrom() +
                     "\n\n  To:\n  " + getTo() +
                     "\n\n  Subject:\n  " + getDescription() + 
