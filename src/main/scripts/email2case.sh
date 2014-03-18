@@ -13,6 +13,8 @@ JAVA_OPTS="-server \
            -Xmx128m \
            -Dlog4j.configuration=file:$LOG4J_CONFIG_FILE \
            -Dlog4j.debug \
+           -Dsun.net.client.defaultConnectTimeout=60000 \
+           -Dsun.net.client.defaultReadTimeout=30000 \
            -Dmail.imap.connectiontimeout=900000 \
            -Dmail.imap.timeout=750000 \
            -Dmail.smtp.connectiontimeout=900000 \
