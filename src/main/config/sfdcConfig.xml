@@ -13,6 +13,7 @@
         <port>465</port>
         <user>sample_user</user>
         <password>123456</password>
+        <prefix>[email-to-case] </prefix>
         <service>com.sforce.mail.SMTPNotificationAuth</service>
     </notify>
     <attachments>

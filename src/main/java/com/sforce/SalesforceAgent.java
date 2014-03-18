@@ -434,6 +434,7 @@ public class SalesforceAgent {
             String user = SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pNOTIFY, ConfigParameters.pUSER);
             String password = SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pNOTIFY, ConfigParameters.pPASSWORD);
             String classname = SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pNOTIFY, ConfigParameters.pSERVICE);
+            String prefix = SalesforceAgent.GLOBAL_CONFIG.get(ConfigParameters.pNOTIFY, ConfigParameters.pPREFIX);
 
             if(host == null) {
                 throw new InvalidConfigurationException(ConfigurationExceptionCode.NOTIFICATION_HOST_NOT_FOUND);
@@ -441,6 +442,10 @@ public class SalesforceAgent {
 
             if(user == null) {
                 throw new InvalidConfigurationException(ConfigurationExceptionCode.NOTIFICATION_USER_NOT_FOUND);
+            }
+
+            if(prefix == null) {
+                prefix = "";
             }
 
             LoginCredentials lc = new LoginCredentials(host, port, user, password);
@@ -461,6 +466,7 @@ public class SalesforceAgent {
             Object objectNotification = constructor.newInstance(new Object[] { lc });
             if (objectNotification instanceof Notification) {
                 Notification notification = (Notification)objectNotification;
+                notification.setPrefix(prefix);
                 notification.setDescription(sDescription);
                 notification.setMessageText(sbMsgText.toString());
                 notification.setSeverity(sSeverity);

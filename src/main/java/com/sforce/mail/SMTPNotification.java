@@ -61,13 +61,13 @@ public class SMTPNotification extends Notification {
 
     /**
      *
-   * @param _oCredentials
+     * @param _oCredentials
      */
     public SMTPNotification(LoginCredentials _oCredentials) {
         super(_oCredentials);
     }
 
-    /*
+    /**
      *
      * @see com.sforce.mail.Notification#sendNotification()
      */
@@ -76,14 +76,14 @@ public class SMTPNotification extends Notification {
         logger.warn("Sending new notification:" +
                     "\n\n  From:\n  " + getFrom() +
                     "\n\n  To:\n  " + getTo() +
-                    "\n\n  Subject:\n  " + getDescription() + 
+                    "\n\n  Subject:\n  " + getPrefix() + getDescription() + 
                     "\n\n  Text:\n  " + getMessageText());
 
         // Create new message
         try {
             MimeMessage msg = new MimeMessage(getMailSession());
             msg.setDescription(this.getDescription());
-            msg.setSubject(this.getDescription());
+            msg.setSubject(getPrefix() + getDescription());
             msg.setText(this.getMessageText());
 
             Address addrFrom = new InternetAddress(this.getFrom());

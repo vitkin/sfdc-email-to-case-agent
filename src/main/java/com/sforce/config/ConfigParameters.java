@@ -49,6 +49,7 @@ public interface ConfigParameters {
     final String pNOTIFY_EMAIL        = "notifyEmail";
     final String pNOTIFY_ON_ERROR     = "notifyonerror";
     final String pFROM                = "from";
+    final String pPREFIX              = "prefix";
 
     final String pUSERNAME            = "userName";
     final String pPASSWORD            = "password";

@@ -50,6 +50,8 @@ public abstract class Notification {
     public static final String SEVERITY_INFO = "INFO";
 
     private String severity;
+    /** Notification Prefix */
+    private String prefix;
     /** Notification Subject and description */
     private String description;
     /** Notification Message */
@@ -63,6 +65,7 @@ public abstract class Notification {
 
     public Notification (LoginCredentials _oCredentials){
         severity = "";
+        prefix = "";
         description = "";
         messageText = "";
         recipients = "";
@@ -103,6 +106,20 @@ public abstract class Notification {
      */
     public String getUserName() {
         return this.credentials.getUserName();
+    }
+
+    /**
+     * @return Returns the m_sPrefix.
+     */
+    public String getPrefix() {
+        return this.prefix;
+    }
+
+    /**
+     * @param prefix The m_sPrefix to set.
+     */
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
     /**
