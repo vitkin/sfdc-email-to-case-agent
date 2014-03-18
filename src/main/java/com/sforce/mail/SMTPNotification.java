@@ -30,10 +30,11 @@
  */
 package com.sforce.mail;
 
+import com.sforce.util.TextUtil;
+import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-
 import javax.mail.Address;
 import javax.mail.Authenticator;
 import javax.mail.Message;
@@ -41,10 +42,8 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
+import org.apache.commons.exec.LogOutputStream;
 import org.apache.log4j.Logger;
-
-import com.sforce.util.TextUtil;
 
 /**
  * SMTPNotification
@@ -57,10 +56,12 @@ import com.sforce.util.TextUtil;
  */
 public class SMTPNotification extends Notification {
 
-    static Logger logger = Logger.getLogger(SMTPNotification.class.getName());
+    private static final Logger logger = Logger.getLogger(SMTPNotification.class.getName());
+    private static final Logger mLogger = Logger.getLogger("javax.mail");
 
     /**
      *
+   * @param _oCredentials
      */
     public SMTPNotification(LoginCredentials _oCredentials) {
         super(_oCredentials);
@@ -122,6 +123,18 @@ public class SMTPNotification extends Notification {
         addProperties(p);
 
         Session oMailSession = Session.getInstance(p, getAuthenticator());
+
+        if (mLogger.isDebugEnabled()) {
+            oMailSession.setDebugOut(new PrintStream(new LogOutputStream() {
+                @Override
+                protected void processLine(String line, int level) {
+                    mLogger.debug(line);
+                }
+            }));
+
+            oMailSession.setDebug(true);
+        }
+
         return oMailSession;
     }
 
