@@ -732,7 +732,14 @@ public class ParsedMessage {
             private byte[] getEmbeddedContent(Part part) throws MessagingException, IOException {
 
                 try {
-                    ParsedMessage msg = new ParsedMessage(new MimeMessage(null,part.getInputStream()));
+                    InputStream is = part.getInputStream();
+                    final String[] enc = part.getHeader("Content-Transfer-Encoding");
+
+                    if(enc != null && enc.length == 1) {
+                        is = MimeUtility.decode(is, enc[0]);
+                    }
+
+                    ParsedMessage msg = new ParsedMessage(new MimeMessage(null, is));
                     StringBuffer sbMsg = new StringBuffer(1024);
                     String sFileExtension;
 
