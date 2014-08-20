@@ -57,8 +57,8 @@ import com.sforce.mail.Notification;
  *
  *     java MailUtil.class email2case.xml service command [command2 ...n]<br><br>
  *
- *      email2case.xml ==> the configuration file for your mail servers.<br>
- *      service ==> the particular mail server to report on as identified in the config file.<br><br>
+ *      email2case.xml ==&gt; the configuration file for your mail servers.<br>
+ *      service ==&gt; the particular mail server to report on as identified in the config file.<br><br>
  *
  *      Commands:<br>
  *        Folders   : List all folders available on the mail server.<br>

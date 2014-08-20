@@ -195,9 +195,9 @@ public abstract class GenericClient implements Runnable {
     }
 
     /**
-     * @return binding the SoapBindingStub to gain access to SFDC service
-     * @throws FailedBindingException
      * This was made protected for testing purposes.
+     * @return binding the SoapBindingStub to gain access to SFDC service
+     * @throws com.sforce.ws.ConnectionException
      */
     protected PartnerConnection getConnection() throws ConnectionException {
         int iAttempts = 0;
@@ -284,12 +284,6 @@ public abstract class GenericClient implements Runnable {
      * Connects to the Salesforce system as needed, maintaining a live connection until
      * the specified timeout has elapsed. Kanishka made this protected.
      * @throws ConnectionException
-     *
-     * @throws MalformedURLException
-     * @throws ServiceException
-     * @throws UnexpectedErrorFault
-     * @throws LoginFault
-     * @throws RemoteException
      */
 
     protected void login() throws ConnectionException {

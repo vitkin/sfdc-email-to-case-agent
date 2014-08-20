@@ -192,7 +192,7 @@ public class ParsedMessage {
     }
 
     /**
-     * @return HashMap <String, ByteBuffer>
+     * @return HashMap &lt;String, ByteBuffer&gt;
      */
     public HashMap<String,ByteBuffer> getOversizedAttachments() {
         HashMap<String,ByteBuffer> map = new HashMap<String, ByteBuffer>();

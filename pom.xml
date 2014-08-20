@@ -12,8 +12,10 @@
   <version>2.0-SNAPSHOT</version>
   
   <prerequisites>
-    <maven>3.0</maven>
+    <maven>3.2</maven>
   </prerequisites>
+
+  <inceptionYear>2005</inceptionYear>
 
   <licenses>
     <license>
@@ -23,6 +25,11 @@
       <comments>A business-friendly OSS license</comments>
     </license>
   </licenses>
+
+  <organization>
+    <name>salesforce.com, inc.</name>
+    <url>http://www.salesforce.com</url>
+  </organization>
 
   <build>
     <pluginManagement>
@@ -54,6 +61,57 @@
             </lifecycleMappingMetadata>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <version>2.1.10</version>
+        </plugin>
+        <plugin>
+          <groupId>com.atlassian.maven.plugins</groupId>
+          <artifactId>maven-jgitflow-plugin</artifactId>
+          <version>1.0-alpha27</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>1.7</version>
+        </plugin>
+        <plugin>        
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+        <plugin>            
+          <artifactId>maven-source-plugin</artifactId>
+          <version>2.3</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>            
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.9.1</version>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>            
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.4.1</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -61,7 +119,13 @@
       <plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
-        <version>2.1.9</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <dateFormat>dd.MM.yyyy '@' HH:mm:ss Z</dateFormat>
           <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
@@ -87,18 +151,11 @@
             <forceLongFormat>false</forceLongFormat>
           </gitDescribe>
         </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>revision</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
+
       <plugin>
         <groupId>com.atlassian.maven.plugins</groupId>
         <artifactId>maven-jgitflow-plugin</artifactId>
-        <version>1.0-alpha27</version>
         <configuration>
           <flowInitContext>
             <masterBranchName>master</masterBranchName>
@@ -111,24 +168,10 @@
           <noDeploy>true</noDeploy>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>1.5</version>
-        <configuration>
-          <licenseName>sfdc_bsd-3</licenseName>
-          <inceptionYear>2005</inceptionYear>
-          <organizationName>salesforce.com, inc.</organizationName>
-          <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-          <licenseResolver>${project.baseUri}src/license</licenseResolver>
-          <includes>
-            <include>**/com/sforce/**/*</include>
-          </includes>
-          <excludes>
-            <exclude>**/*.properties</exclude>
-            <exclude>**/*.xml</exclude>
-          </excludes>
-        </configuration>
         <executions>
           <execution>
             <id>update-file-header</id>
@@ -144,11 +187,22 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <licenseName>sfdc_bsd-3</licenseName>
+          <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+          <licenseResolver>${project.baseUri}src/license</licenseResolver>
+          <includes>
+            <include>**/com/sforce/**/*</include>
+          </includes>
+          <excludes>
+            <exclude>**/*.properties</exclude>
+            <exclude>**/*.xml</exclude>
+          </excludes>
+        </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
+
+      <plugin>        
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
@@ -156,6 +210,26 @@
           <compilerArgs>
             <arg>-Xlint:unchecked</arg>
           </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <plugin>            
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <!-- Classpath is added to the manifest of the created jar file. -->
+              <addClasspath>true</addClasspath>
+              <!--
+                  Configures the classpath prefix. This configuration option is
+                  used to specify that all needed libraries are found under lib/
+                  directory.
+              -->
+              <classpathPrefix>lib/</classpathPrefix>
+              <!-- Specifies the main class of the application -->
+              <mainClass>com.sforce.SalesforceAgent</mainClass>
+            </manifest>
+          </archive>
         </configuration>
       </plugin>
     </plugins>
@@ -166,86 +240,38 @@
       <id>attach-sources</id>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
+          <plugin>            
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.2.1</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
           </plugin>
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>attach-javadocs</id>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
+          <plugin>            
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
           </plugin>
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>create-distribution</id>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
+          <plugin>            
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.2.1</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
           </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
+
+          <plugin>            
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
           </plugin>
-          <!-- The configuration of maven-assembly-plugin -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
+
+          <plugin>            
             <artifactId>maven-assembly-plugin</artifactId>
-            <version>2.4</version>
-            <!-- The configuration of the plugin -->
-            <configuration>
-              <!-- Specifies the configuration file of the assembly plugin -->
-              <descriptors>
-                <descriptor>src/main/assembly/distribution.xml</descriptor>
-              </descriptors>
-              <finalName>EmailAgent-${project.version}</finalName>
-              <appendAssemblyId>false</appendAssemblyId>
-            </configuration>
             <executions>
               <execution>
                 <id>create-distribution</id>
@@ -255,30 +281,12 @@
                 <phase>package</phase>
               </execution>
             </executions>
-          </plugin>
-          <!-- The configuration of maven-jar-plugin -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>2.4</version>
-            <!-- The configuration of the plugin -->
             <configuration>
-              <!-- Configuration of the archiver -->
-              <archive>
-                <!-- Manifest specific configuration -->
-                <manifest>
-                  <!-- Classpath is added to the manifest of the created jar file. -->
-                  <addClasspath>true</addClasspath>
-                  <!--
-                      Configures the classpath prefix. This configuration option is
-                      used to specify that all needed libraries are found under lib/
-                      directory.
-                  -->
-                  <classpathPrefix>lib/</classpathPrefix>
-                  <!-- Specifies the main class of the application -->
-                  <mainClass>com.sforce.SalesforceAgent</mainClass>
-                </manifest>
-              </archive>
+              <descriptors>
+                <descriptor>src/main/assembly/distribution.xml</descriptor>
+              </descriptors>
+              <finalName>EmailAgent-${project.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
             </configuration>
           </plugin>
         </plugins>
@@ -302,22 +310,22 @@
     <dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>mailapi</artifactId>
-      <version>1.5.1</version>
+      <version>1.5.2</version>
     </dependency>
     <dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>imap</artifactId>
-      <version>1.5.1</version>
+      <version>1.5.2</version>
     </dependency>
     <dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>smtp</artifactId>
-      <version>1.5.1</version>
+      <version>1.5.2</version>
     </dependency>
     <dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>pop3</artifactId>
-      <version>1.5.1</version>
+      <version>1.5.2</version>
     </dependency>
     <dependency>
       <groupId>com.sforce.sfdc-wsc</groupId>
